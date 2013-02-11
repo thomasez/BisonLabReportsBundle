@@ -1,7 +1,7 @@
 {
     "name": "redpilllinpro/simple-reports-bundle",
     "type": "symfony-bundle",
-    "description": "A very simple service based reports generator/viewer",
+    "description": "A very simple, but flexible, service based reports generator/viewer",
     "keywords": ["reports"],
     "homepage": "https://github.com/thomasez/RedpillLinproSimpleReportsBundle",
     "license": "GPLv2",
