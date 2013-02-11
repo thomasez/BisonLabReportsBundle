@@ -1,0 +1,31 @@
+{% extends "RedpillLinproSimpleReportsBundle::layout.html.twig" %}
+
+{% block content %}
+
+<h1><strong> {{ report.report }} </strong> </h1>
+
+<table class="record_properties" id="sortable_table">
+    <thead>
+    <tr>
+      {% for elem in header %}
+        <th>{{ elem }}</th>
+      {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+      {% for row in data %}
+        <tr>
+            {% for col in row %}
+                {% if col is not empty %}
+                        <td>{{ col }}</td>
+                {% else %}
+                        <td>&nbsp;</td>
+                {% endif %}
+           {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

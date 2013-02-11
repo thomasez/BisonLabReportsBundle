@@ -1,0 +1,37 @@
+{% extends "RedpillLinproSimpleReportsBundle::layout.html.twig" %}
+
+{% block content %}
+
+<h2>Pre defined / fixed reports</h2>
+
+<form action="{{ path('reports_run_fixed') }}" method="post" {{ form_enctype(report_form) }}>
+    <ul>
+        <li><strong>Report:</strong> {{ form_widget(report_form.report) }}
+        <br />
+        <li><strong>Output as:</strong> {{ form_widget(report_form.output_method) }}
+        <br />
+        <li><strong>Criterias:</strong> {{ form_rest(report_form) }}
+    </ul>
+
+    <button type="submit">Run</button>
+</form>
+
+{#
+<h2>Compile your own:</h2>
+
+<form action="{{ path('reports_run_compiled') }}" method="post" {{ form_enctype(picker_form) }}>
+    <ul>
+        <li><strong>Pickers:</strong> {{ form_widget(picker_form.pickers) }}
+        <br />
+        <li><strong>Filters:</strong> 
+        <br />
+        <li><strong>Output as:</strong> {{ form_widget(picker_form.output_method) }}
+        <br />
+        <li><strong>Criterias:</strong> {{ form_rest(picker_form) }}
+    </ul>
+
+    <button type="submit">Run</button>
+</form>
+#}
+
+{% endblock %}

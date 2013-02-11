@@ -1,0 +1,5 @@
+services:
+    simple_reports:
+        class: RedpillLinpro\SimpleReportsBundle\Lib\Reports\Reports
+        arguments: ['@service_container', %simple_reports.report_classes%,  %simple_reports.default_filestore%]
+
