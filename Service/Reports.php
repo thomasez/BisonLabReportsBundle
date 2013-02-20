@@ -1,6 +1,6 @@
 <?php
 
-namespace RedpillLinpro\SimpleReportsBundle\Lib\Reports;
+namespace RedpillLinpro\SimpleReportsBundle\Service;
 
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
