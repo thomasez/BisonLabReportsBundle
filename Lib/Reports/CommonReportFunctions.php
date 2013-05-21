@@ -5,9 +5,9 @@ namespace RedpillLinpro\SimpleReportsBundle\Lib\Reports;
 class CommonReportFunctions
 {
 
-    public function getEntityManager()
+    public function getManager()
     {
-        return $this->container->get('doctrine')->getEntityManager();
+        return $this->container->get('doctrine')->getManager();
     } 
 
 }

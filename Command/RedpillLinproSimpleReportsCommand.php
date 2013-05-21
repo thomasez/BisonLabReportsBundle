@@ -84,7 +84,7 @@ EOT
 
         $reports->runFixedReport($config);
 
-      //  $this->entityManager = $this->getContainer()->get('doctrine')->getEntityManager();
+      //  $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
      //   $this->entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
 
     }
@@ -96,7 +96,7 @@ EOT
   protected function execute($arguments = array(), $options = array())
   {
     $this->databaseManager = new sfDatabaseManager($this->configuration);
-    $this->em = $this->getEntityManager();
+    $this->em = $this->getManager();
 
     $report_config = sfYaml::load(sfConfig::get("sf_root_dir") . "/config/reports.yml");
     $report_output_config = sfYaml::load(sfConfig::get("sf_root_dir") . "/config/report_output.yml");
