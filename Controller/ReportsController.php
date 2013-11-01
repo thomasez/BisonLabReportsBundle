@@ -70,6 +70,10 @@ class ReportsController extends Controller
             return $report_result;
         }
 
+        // We do presume the object returned is a response object.
+        if (empty($report_result)) {
+            return $report_result;
+        }
         // We got da web.
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);
