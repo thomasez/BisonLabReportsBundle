@@ -17,7 +17,7 @@
         <tr>
             {% for col in row %}
                 {% if col is not empty %}
-                        <td>{{ col }}</td>
+                        <td>{{ col | raw }}</td>
                 {% else %}
                         <td>&nbsp;</td>
                 {% endif %}
