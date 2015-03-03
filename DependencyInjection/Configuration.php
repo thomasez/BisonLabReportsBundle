@@ -24,6 +24,15 @@ class Configuration implements ConfigurationInterface
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
 
+               // ->scalarNode('default_filestore')->defaultValue('/tmp')->cannotBeEmpty()->end()
+        $rootNode
+            ->children()
+                ->scalarNode('default_filestore')->end()
+                ->arrayNode('report_classes')
+                    ->prototype('scalar')->end()
+                ->end()
+        ->end();
+
         return $treeBuilder;
     }
 }

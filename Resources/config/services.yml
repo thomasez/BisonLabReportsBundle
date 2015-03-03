@@ -1,5 +1,10 @@
 services:
     simple_reports:
         class: RedpillLinpro\SimpleReportsBundle\Service\Reports
-        arguments: ['@service_container', %simple_reports.report_classes%,  %simple_reports.default_filestore%]
+        arguments: 
+            container: '@service_container'
+            #report_classes: redpill_linpro_simple_reports.report_classes
+            #default_filestore: redpill_linpro_simple_reports.default_filestore
 
+            report_classes: %redpill_linpro_simple_reports.report_classes%
+            default_filestore: redpill_linpro_simple_reports.default_filestore

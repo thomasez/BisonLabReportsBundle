@@ -1,0 +1,7 @@
+simple_reports:
+    reports: Reports
+    report: Report
+    pre_fixed_reports: Pre defined and fixed reports
+    run: Run
+    criterias: Criterias
+    output_as: Output as

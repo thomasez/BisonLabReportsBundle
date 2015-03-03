@@ -2,18 +2,18 @@
 
 {% block content %}
 
-<h2>Pre defined / fixed reports</h2>
+<h2>{{'simple_reports.pre_fixed_reports'|trans({}, 'simple_reports')}}</h2>
 
 <form action="{{ path('reports_run_fixed') }}" method="post" {{ form_enctype(report_form) }}>
     <ul>
-        <li><strong>Report:</strong> {{ form_widget(report_form.report) }}
+        <li><strong>{{'simple_reports.report'|trans({}, 'simple_reports')}}:</strong> {{ form_widget(report_form.report) }}
         <br />
-        <li><strong>Output as:</strong> {{ form_widget(report_form.output_method) }}
+        <li><strong>{{'simple_reports.output_as'|trans({}, 'simple_reports')}}:</strong> {{ form_widget(report_form.output_method) }}
         <br />
-        <li><strong>Criterias:</strong> {{ form_rest(report_form) }}
+        <li><strong>{{'simple_reports.criterias'|trans({}, 'simple_reports')}}:</strong> {{ form_rest(report_form) }}
     </ul>
 
-    <button type="submit">Run</button>
+    <button type="submit">{{'simple_reports.run'|trans({}, 'simple_reports')}}</button>
 </form>
 
 {#
