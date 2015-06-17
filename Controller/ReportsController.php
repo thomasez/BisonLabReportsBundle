@@ -49,15 +49,11 @@ class ReportsController extends Controller
      * @Method("POST")
      * @Template()
      */
-    public function runFixedAction($access)
+    public function runFixedAction(Request $request, $access)
     {
 
         $reports = $this->get('simple_reports');
-
-        $request = $this->getRequest();
-
         $config = $request->request->get('form');
-
         $report_result = $reports->runFixedReport($config);
 
         // All is just done and finished.
@@ -95,12 +91,9 @@ class ReportsController extends Controller
      * @Method("POST")
      * @Template("RedpillLinproSimpleReportsBundle:Reports:run.html.twig")
      */
-    public function runCompiledAction($access)
+    public function runCompiledAction(Request $request, $access)
     {
         $reports = $this->get('simple_reports');
-
-        $request = $this->getRequest();
-
         $config = $request->request->get('form');
 
         $report_result = $reports->runCompiledReport($config);
