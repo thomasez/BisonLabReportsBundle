@@ -62,24 +62,25 @@ class ReportsController extends Controller
         }
 
         // We do presume the object returned is a response object.
-        if ('object' === gettype($report_result)) {
+        if ('object' === gettype($report_result) && $report_result instanceof Response ) {
             return $report_result;
         }
 
-        // We do presume the object returned is a response object.
-        if (empty($report_result)) {
-            return $report_result;
-        }
-        // We got da web.
-        if (!isset($report_result['header']) || !$header = $report_result['header']) {
-            $header = array_keys($report_result['data'][0]);
+        $data = array();
+        $header = array('Nothing found');
+        if (!empty($report_result) && isset($report_result['data'])) {
+            $data = $report_result['data'];
+            // We got da web.
+            if (!isset($report_result['header']) || !$header = $report_result['header']) {
+                $header = array_keys($report_result['data'][0]);
+            }
         }
 
         return $this->render('RedpillLinproSimpleReportsBundle:Reports:run.html.twig',
             array(
                 'header' => $header,
                 'report' => $config,
-                'data'   => $report_result['data']
+                'data'   => $data
             )
         );
 
