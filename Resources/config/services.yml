@@ -1,5 +1,5 @@
 services:
-    simple_reports:
+    bisonlab_reports:
         class: BisonLab\ReportsBundle\Service\Reports
         arguments: 
             container: '@service_container'

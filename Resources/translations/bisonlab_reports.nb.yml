@@ -1,4 +1,4 @@
-simple_reports:
+bisonlab_reports:
     reports: Rapporter
     report: Rapport
     pre_fixed_reports: Predefinerte og faste rapporter.

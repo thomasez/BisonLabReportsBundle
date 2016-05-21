@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
  */
 
-class BisonLabSimpleReportsCommand extends ContainerAwareCommand
+class BisonLabReportsCommand extends ContainerAwareCommand
 {
 
     private $verbose = true;
@@ -59,7 +59,7 @@ EOT
         $output->writeln(sprintf('Debug mode is <comment>%s</comment>.', $input->getOption('no-debug') ? 'off' : 'on'));
         $output->writeln('');
 
-        $reports = $this->getContainer()->get('simple_reports');
+        $reports = $this->getContainer()->get('bisonlab_reports');
 
         if ($this->list)
         {

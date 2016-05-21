@@ -25,7 +25,7 @@ class ReportsController extends Controller
      */
     public function indexAction($access)
     {
-        $reports = $this->get('simple_reports');
+        $reports = $this->get('bisonlab_reports');
 
         // $reports = $reports->getReports();
         $picker_form_builder = $this->createPickerFormBuilder($reports->getPickers());
@@ -52,7 +52,7 @@ class ReportsController extends Controller
     public function runFixedAction(Request $request, $access)
     {
 
-        $reports = $this->get('simple_reports');
+        $reports = $this->get('bisonlab_reports');
         $config = $request->request->get('form');
         $report_result = $reports->runFixedReport($config);
 
@@ -94,7 +94,7 @@ class ReportsController extends Controller
      */
     public function runCompiledAction(Request $request, $access)
     {
-        $reports = $this->get('simple_reports');
+        $reports = $this->get('bisonlab_reports');
         $config = $request->request->get('form');
 
         $report_result = $reports->runCompiledReport($config);
