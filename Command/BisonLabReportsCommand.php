@@ -1,6 +1,6 @@
 <?php
 
-namespace RedpillLinpro\SimpleReportsBundle\Command;
+namespace BisonLab\ReportsBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,12 +13,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * PHP Version 5
  *
- * @author    Thomas Lundquist <thomasez@redpill-linpro.com>
+ * @author    Thomas Lundquist <thomasez@bisonlab.no>
  * @copyright 2010, 2011, 2012 Repill-Linpro
+ * @copyright 2015, 2016 BisonLab AS
  * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
  */
 
-class RedpillLinproSimpleReportsCommand extends ContainerAwareCommand
+class BisonLabSimpleReportsCommand extends ContainerAwareCommand
 {
 
     private $verbose = true;

@@ -1,6 +1,6 @@
 <?php
 
-namespace RedpillLinpro\SimpleReportsBundle\Controller;
+namespace BisonLab\ReportsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -8,7 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
-use RedpillLinpro\SimpleReportsBundle\Controller\CommonController as CommonController;
+use BisonLab\ReportsBundle\Controller\CommonController as CommonController;
 
 
 /**
@@ -76,7 +76,7 @@ class ReportsController extends Controller
             }
         }
 
-        return $this->render('RedpillLinproSimpleReportsBundle:Reports:run.html.twig',
+        return $this->render('BisonLabReportsBundle:Reports:run.html.twig',
             array(
                 'header' => $header,
                 'report' => $config,
@@ -90,7 +90,7 @@ class ReportsController extends Controller
      * Lists all User entities.
      * @Route("/run", name="reports_run_compiled");
      * @Method("POST")
-     * @Template("RedpillLinproSimpleReportsBundle:Reports:run.html.twig")
+     * @Template("BisonLabReportsBundle:Reports:run.html.twig")
      */
     public function runCompiledAction(Request $request, $access)
     {

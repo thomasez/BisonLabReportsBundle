@@ -1,6 +1,6 @@
 <?php
 
-namespace RedpillLinpro\SimpleReportsBundle\Lib\Reports;
+namespace BisonLab\ReportsBundle\Lib\Reports;
 
 class CommonReportFunctions
 {

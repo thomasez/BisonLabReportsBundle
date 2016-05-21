@@ -1,14 +1,14 @@
 {
-    "name": "redpilllinpro/simple-reports-bundle",
+    "name": "bisonlab/eports-bundle",
     "type": "symfony-bundle",
     "description": "A very simple, but flexible, service based reports generator/viewer",
     "keywords": ["reports"],
-    "homepage": "https://github.com/thomasez/RedpillLinproSimpleReportsBundle",
+    "homepage": "https://github.com/thomasez/BisonLabReportsBundle",
     "license": "GPLv2",
     "authors": [
         {
             "name": "Thomas Lundquist",
-            "email": "thomasez@redpill-linpro.com"
+            "email": "github@bisonlab.no"
         }
     ],
     "require": {
@@ -16,8 +16,8 @@
         "symfony/framework-bundle": ">=2.8"
     },
     "autoload": {
-        "psr-0": { "RedpillLinpro\\SimpleReportsBundle": "" }
+        "psr-0": { "BisonLab\\ReportsBundle": "" }
     },
-    "target-dir": "RedpillLinpro/SimpleReportsBundle"
+    "target-dir": "BisonLab/ReportsBundle"
 }
 
