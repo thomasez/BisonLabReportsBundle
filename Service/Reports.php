@@ -4,12 +4,7 @@ namespace BisonLab\ReportsBundle\Service;
 
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
-
-
-/*
- * I know, this is old school and everything should be listeners and event
- * and services.
- */
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class Reports 
 {
@@ -150,7 +145,7 @@ class Reports
      */
     public function addOutputChoicesToForm(&$form)
     {
-        $form->add('output_method', 'choice', array('choices' => array(
+        $form->add('output_method', ChoiceType::class, array('choices' => array(
             'web' => 'Web', 
             'csv' => 'CSV', 
             'ods' => 'OpenOffice Calc',

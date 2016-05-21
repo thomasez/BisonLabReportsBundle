@@ -8,8 +8,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
-use BisonLab\ReportsBundle\Controller\CommonController as CommonController;
-
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 /**
  * User controller.
@@ -113,8 +113,10 @@ class ReportsController extends Controller
         }
 
         $picker_form_builder = $this->createFormBuilder()
-            ->add('pickers', 'choice', array('choices' => $choices));
-
+            ->add('pickers', ChoiceType::class, array(
+                'choices' => $choices,
+                'choices_as_values' => true)
+                );
 
         return $picker_form_builder;
     }
@@ -128,8 +130,10 @@ class ReportsController extends Controller
         }
 
         $report_form_builder = $this->createFormBuilder()
-            ->add('report', 'choice', array('choices' => $choices));
-
+            ->add('report', ChoiceType::class, array(
+                'choices' => $choices,
+                'choices_as_values' => true)
+                );
 
         return $report_form_builder;
     }
@@ -137,10 +141,8 @@ class ReportsController extends Controller
     private function createDeleteForm($id)
     {
         return $this->createFormBuilder(array('id' => $id))
-            ->add('id', 'hidden')
+            ->add('id', HiddenType::class)
             ->getForm()
         ;
     }
-
-
 }
