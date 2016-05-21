@@ -82,21 +82,31 @@ class Reports
                 break;
             case 'xcsv':
                 return isset($config['filename']) ? 
+                    // This actually does not exist..
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsXCsv($config, $report_result);
                 break;
             case 'xls2007':
                 return isset($config['filename']) ? 
+                    // TODO: Create this one
                     $this->printToXls2007File($config, $report_result)
                     : $this->sendAsXls2007($config, $report_result);
                 break;
             case 'xls5':
                 return isset($config['filename']) ? 
+                    // TODO: Create this one
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsXls5($config, $report_result);
                 break;
+            case 'ods':
+                return isset($config['filename']) ? 
+                    // TODO: Create this one
+                    $this->printToXls5File($config, $report_result)
+                    : $this->sendAsOds($config, $report_result);
+                break;
             case 'pdf':
                 return isset($config['filename']) ? 
+                    // TODO: Create this one
                     $this->PrintToPdf($config, $report_result)
                     : $this->sendAsPdf($config, $report_result);
                 break;
@@ -143,9 +153,12 @@ class Reports
         $form->add('output_method', 'choice', array('choices' => array(
             'web' => 'Web', 
             'csv' => 'CSV', 
+            'ods' => 'OpenOffice Calc',
             'xls2007' => 'XLS 2007',
             'xls5' => 'XLS 5', 
-            // Somehow it bugs as hell from web, takes too long time 
+            // Not yet, have to decide on a renderer and make it available
+            // somehow.
+            // https://github.com/PHPOffice/PHPExcel/blob/develop/Examples/01simple-download-pdf.php
             // 'pdf' => 'PDF', 
             // Not in Luiggios Bundle 'xcsv' => 'xCSV', 
             )));
@@ -214,46 +227,50 @@ class Reports
     public function sendAsXls2007($config, $report_result)
     {
 
-        // Heavy...
+        $eobject = $this->compilePhpExelObject($config, $report_result);
+        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel2007');
 
-        $service = $this->container->get('xls.service_xls2007');
-
-        $this->compilePhpExelSheet($service, $config, $report_result);
-
-        $response = $service->getResponse();
+        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=report.xls');
 
         return $response;
-
     }
 
     public function sendAsXls5($config, $report_result)
     {
+        $eobject = $this->compilePhpExelObject($config, $report_result);
+        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel5');
 
-        // Heavy...
-
-        $service = $this->container->get('xls.service_xls5');
-
-        $this->compilePhpExelSheet($service, $config, $report_result);
-
-        $response = $service->getResponse();
+        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
+        
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=report.xls');
 
         return $response;
+    }
 
+    public function sendAsOds($config, $report_result)
+    {
+        $eobject = $this->compilePhpExelObject($config, $report_result);
+        // Or is it the same as PHPOffice - OpenDocument
+        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OpenDocument');
+        // $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OOCalc');
+
+        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
+        
+        $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename=report.ods');
+
+        return $response;
     }
 
     public function sendAsXCsv($config, $report_result)
     {
+        $eobject = $this->compilePhpExelObject($config, $report_result);
+        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'CSV');
 
-        // Heavy...
-
-        $service = $this->container->get('xls.service_csv');
-        $this->compilePhpExelSheet($service, $config, $report_result);
-
-        $response = $service->getResponse();
+        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=report.csv');
 
@@ -263,29 +280,27 @@ class Reports
 
     public function sendAsPdf($config, $report_result)
     {
+        $eobject = $this->compilePhpExelObject($config, $report_result);
+        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'PDF');
 
-        // Heavy...
-
-        $service = $this->container->get('xls.service_pdf');
-        $this->compilePhpExelSheet($service, $config, $report_result);
-
-        $response = $service->getResponse();
+        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/pdf; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=report.pdf');
 
         return $response;
-
     }
 
-    public function compilePhpExelSheet(&$service, $config, $report_result)
+    public function compilePhpExelObject($config, $report_result)
     {
+        // TODO: Make this configureable. Either through the config argument or
+        // parameters.yml/config.yml
+        $eobject = $this->container->get('phpexcel')->createPHPExcelObject();
 
-        $service->excelObj->getProperties()->setCreator("Inventory")
-                            ->setLastModifiedBy("Inventory")
-                            ->setTitle("Report")
-                            ->setSubject("Inventory Report");
-
-        $delimiter = isset($config['delimiter']) ? $config['delimiter'] : ";";
+        $eobject->getProperties()->setCreator("BisonLab Reports Bundle")
+                ->setLastModifiedBy("BisonLab Reports Bundle")
+                ->setTitle("Report")
+                ->setCategory("Report")
+                ->setSubject("Report");
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);
@@ -294,7 +309,7 @@ class Reports
         $col = 0;
         $row = 1;
         foreach ($header as $head) {
-            $service->excelObj->setActiveSheetIndex(0)
+            $eobject->setActiveSheetIndex(0)
                 ->setCellValueExplicitByColumnAndRow($col, $row, $head);
             $col++;
         }
@@ -304,16 +319,18 @@ class Reports
         {
             $col = 0;
             foreach ($line as $coldata) {
-                $service->excelObj->setActiveSheetIndex(0)
+                $eobject->setActiveSheetIndex(0)
                     ->setCellValueExplicitByColumnAndRow($col, $row, $coldata);
                 $col++;
             }
             $row++;
         }
 
-        $service->excelObj->getActiveSheet()->setTitle('Inventory Report');
+        $eobject->getActiveSheet()->setTitle('Inventory Report');
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $service->excelObj->setActiveSheetIndex(0);
+        $eobject->setActiveSheetIndex(0);
+
+        return $eobject;
 
     }
 
