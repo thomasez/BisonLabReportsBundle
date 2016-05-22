@@ -12,8 +12,8 @@
         }
     ],
     "require": {
-        "liuggio/ExcelBundle": "1.0.*",
-        "symfony/framework-bundle": ">=2.2"
+        "liuggio/ExcelBundle": "2.0.*@dev",
+        "symfony/framework-bundle": ">=2.8"
     },
     "autoload": {
         "psr-0": { "BisonLab\\ReportsBundle": "" }
