@@ -145,17 +145,19 @@ class Reports
      */
     public function addOutputChoicesToForm(&$form)
     {
-        $form->add('output_method', ChoiceType::class, array('choices' => array(
-            'web' => 'Web', 
-            'csv' => 'CSV', 
-            'ods' => 'OpenOffice Calc',
-            'xls2007' => 'XLS 2007',
-            'xls5' => 'XLS 5', 
-            // Not yet, have to decide on a renderer and make it available
-            // somehow.
-            // https://github.com/PHPOffice/PHPExcel/blob/develop/Examples/01simple-download-pdf.php
-            // 'pdf' => 'PDF', 
-            // Not in Luiggios Bundle 'xcsv' => 'xCSV', 
+        $form->add('output_method', ChoiceType::class, array(
+            'choices_as_values' => true,
+            'choices' => array(
+                'Web'             => 'web',
+                'CSV'             => 'csv',
+                'OpenOffice Calc' => 'ods',
+                'XLS 2007'        => 'xls2007',
+                'XLS 5'           => 'xls5',
+                // Not yet, have to decide on a renderer and make it available
+                // somehow.
+                // https://github.com/PHPOffice/PHPExcel/blob/develop/Examples/01simple-download-pdf.php
+                // 'pdf' => 'PDF', 
+                // Not in Luiggios Bundle 'xcsv' => 'xCSV', 
             )));
     }
 

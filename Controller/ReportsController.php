@@ -109,7 +109,7 @@ class ReportsController extends Controller
         $choices = array();
         $required = array();
         foreach ($pickers as $p => $c) {
-            $choices[$p] = $c['description'];
+            $choices[$c['description']] = $p;
         }
 
         $picker_form_builder = $this->createFormBuilder()
@@ -126,7 +126,7 @@ class ReportsController extends Controller
         $choices = array();
         $required = array();
         foreach ($reports as $r => $c) {
-            $choices[$r] = $c['description'];
+            $choices[$c['description']] = $r;
         }
 
         $report_form_builder = $this->createFormBuilder()
