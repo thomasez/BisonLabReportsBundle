@@ -4,7 +4,7 @@
 
 <h2>{{'bisonlab_reports.pre_fixed_reports'|trans({}, 'bisonlab_reports')}}</h2>
 
-<form action="{{ path('reports_run_fixed') }}" method="post" {{ form_enctype(report_form) }}>
+<form action="{{ path('reports_run_fixed') }}" method="post">
     <ul>
         <li><strong>{{'bisonlab_reports.report'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.report) }}
         <br />
@@ -19,7 +19,7 @@
 {#
 <h2>Compile your own:</h2>
 
-<form action="{{ path('reports_run_compiled') }}" method="post" {{ form_enctype(picker_form) }}>
+<form action="{{ path('reports_run_compiled') }}" method="post">
     <ul>
         <li><strong>Pickers:</strong> {{ form_widget(picker_form.pickers) }}
         <br />
