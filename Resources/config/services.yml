@@ -6,5 +6,5 @@ services:
             #report_classes: bisonlab_reports.report_classes
             #default_filestore: bisonlab_reports.default_filestore
 
-            report_classes: %bisonlab_reports.report_classes%
-            default_filestore: bisonlab_reports.default_filestore
+            report_classes: "%bisonlab_reports.report_classes%"
+            default_filestore: "%bisonlab_reports.default_filestore%"
