@@ -1,10 +1,4 @@
 services:
     bisonlab_reports:
         class: BisonLab\ReportsBundle\Service\Reports
-        arguments:
-            container: '@service_container'
-            #report_classes: bisonlab_reports.report_classes
-            #default_filestore: bisonlab_reports.default_filestore
-
-            report_classes: "%bisonlab_reports.report_classes%"
-            default_filestore: "%bisonlab_reports.default_filestore%"
+        arguments: ['@service_container', '%bisonlab_reports.report_classes%',  '%bisonlab_reports.default_filestore%']
