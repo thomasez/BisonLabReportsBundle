@@ -123,7 +123,7 @@ class Reports
         // Run the filter: (Coming later)
 
         // Serialize everything;
-         $serializer = $this->container->get('serializer');
+         $serializer = $this->container->get('jms_serializer');
         // $encoders = array();
         // $normalizers = array(new GetSetMethodNormalizer());
         // $serializer = new Serializer($normalizers, $encoders);
