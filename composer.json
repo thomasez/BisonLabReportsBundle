@@ -16,8 +16,6 @@
         "symfony/framework-bundle": ">=2.8"
     },
     "autoload": {
-        "psr-0": { "BisonLab\\ReportsBundle": "" }
-    },
-    "target-dir": "BisonLab/ReportsBundle"
+        "psr-4": { "BisonLab\\ReportsBundle\\": "" }
+    }
 }
-
