@@ -6,7 +6,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -19,9 +18,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 class ReportsController extends Controller
 {
     /**
-     * Lists all User entities.
+     * Lists all available reports
      * @Route("/", name="reports");
-     * @Template()
      */
     public function indexAction($access)
     {
@@ -37,17 +35,17 @@ class ReportsController extends Controller
         $reports->addCriteriasToForm($report_form_builder);
         $reports->addOutputChoicesToForm($report_form_builder);
 
-        return array(
+        return $this->render('BisonLabReportsBundle:Reports:index.html.twig',
+            array(
             'picker_form' => $picker_form_builder->getForm()->createView(),
             'report_form' => $report_form_builder->getForm()->createView(),
-        );
+        ));
     }
 
     /**
-     * Lists all User entities.
+     * Run report
      * @Route("/run", name="reports_run_fixed");
      * @Method("POST")
-     * @Template()
      */
     public function runFixedAction(Request $request, $access)
     {
@@ -83,14 +81,12 @@ class ReportsController extends Controller
                 'data'   => $data
             )
         );
-
     }
 
     /**
-     * Lists all User entities.
-     * @Route("/run", name="reports_run_compiled");
+     * Not in use, old relic and seems to be a good plan somehow.
+     * @Route("/run_compiled", name="reports_run_compiled");
      * @Method("POST")
-     * @Template("BisonLabReportsBundle:Reports:run.html.twig")
      */
     public function runCompiledAction(Request $request, $access)
     {
@@ -101,7 +97,8 @@ class ReportsController extends Controller
         if (!isset($data['header']) || !$header = $data['header']) {
             $header = array_keys($report_result['data'][0]);
         }
-
+        return $this->render('BisonLabReportsBundle:Reports:run.html.twig',
+            $report_result);
     }
 
     private function createPickerFormBuilder($pickers)
