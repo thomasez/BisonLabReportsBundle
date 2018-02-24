@@ -4,7 +4,7 @@
     "description": "A very simple, but flexible, service based reports generator/viewer",
     "keywords": ["reports"],
     "homepage": "https://github.com/thomasez/BisonLabReportsBundle",
-    "license": "GPLv2",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Thomas Lundquist",
