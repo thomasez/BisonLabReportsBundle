@@ -8,14 +8,11 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class Reports 
 {
-
     private $report_classes;
     private $picker_list;
     private $report_list;
     private $default_filestore;
     private $container;
-
-    // fixture stuff
 
     public function __construct($container, $report_classes = array(), $default_filestore = null)
     {
@@ -38,7 +35,6 @@ class Reports
                 $this->report_list[$r] = $config;
             }
         }
-
     }
 
     public function getReports()
@@ -51,7 +47,8 @@ class Reports
         return $this->picker_list;
     }
 
-    public function runFixedReport($config) {
+    public function runFixedReport($config)
+    {
         // First, pick the objects.
         $report = $config['report'];
         if (!isset($this->report_list[$report])) {
@@ -106,12 +103,10 @@ class Reports
                     : $this->sendAsPdf($config, $report_result);
                 break;
         }
-
-        // We do have a filename and have to print this stuff.
-
     }
 
-    public function runCompiledReport($config) {
+    public function runCompiledReport($config)
+    {
         // First, pick the objects.
         $picker = $config['pickers'];
         $picker_config = $this->picker_list[$picker];
@@ -123,7 +118,7 @@ class Reports
         // Run the filter: (Coming later)
 
         // Serialize everything;
-         $serializer = $this->container->get('jms_serializer');
+        $serializer = $this->container->get('jms_serializer');
         // $encoders = array();
         // $normalizers = array(new GetSetMethodNormalizer());
         // $serializer = new Serializer($normalizers, $encoders);
@@ -136,7 +131,6 @@ class Reports
         return $serializer->serialize($data, 'json');
             return $data;
         }
-
     }
 
     /* 
@@ -170,7 +164,6 @@ class Reports
 
     public function sendAsCsv($config, $report_result)
     {
-
         // Heavy...
         $filename = "report.csv";
         header( 'Content-Type: text/csv' );
@@ -181,9 +174,7 @@ class Reports
         $this->createCsv($output_file, $config, $report_result);
 
         fclose($output_file);
-
         return true;
-
     }
 
     public function printToCsvFile($config, $report_result)
@@ -199,14 +190,11 @@ class Reports
         }
 
         $this->createCsv($output_file, $config, $report_result);
-
         fclose($output_file);
-
     }
 
     public function createCsv(&$output_file, $config, $report_result)
     {
-
         $delimiter = isset($config['delimiter']) ? $config['delimiter'] : ";";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
@@ -223,7 +211,6 @@ class Reports
 
     public function sendAsXls2007($config, $report_result)
     {
-
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel2007');
 
@@ -272,7 +259,6 @@ class Reports
         $response->headers->set('Content-Disposition', 'attachment;filename=report.csv');
 
         return $response;
-
     }
 
     public function sendAsPdf($config, $report_result)
@@ -328,7 +314,5 @@ class Reports
         $eobject->setActiveSheetIndex(0);
 
         return $eobject;
-
     }
-
 }
