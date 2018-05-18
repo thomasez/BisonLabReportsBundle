@@ -6,11 +6,19 @@
 
 <form action="{{ path('reports_run_fixed') }}" method="post">
     <ul>
-        <li><strong>{{'bisonlab_reports.report'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.report) }}
-        <br />
-        <li><strong>{{'bisonlab_reports.output_as'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.output_method) }}
-        <br />
-        <li><strong>{{'bisonlab_reports.criterias'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_rest(report_form) }}
+        <li>
+            <strong>{{'bisonlab_reports.report'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.report) }}
+        </li>
+        <li><strong>{{'bisonlab_reports.output_as'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.output_method) }}</li>
+        <li>
+            <strong>{{'bisonlab_reports.specify_filename'|trans({}, 'bisonlab_reports')}}:</strong> {{ form_widget(report_form.filename) }}
+        </li>
+        <li>
+            {{ form_widget(report_form.store_server) }}
+        </li>
+        <li><strong>{{'bisonlab_reports.criterias'|trans({}, 'bisonlab_reports')}}</strong> ({{'bisonlab_reports.when_suitable'|trans({}, 'bisonlab_reports')}}):
+         {{ form_rest(report_form) }}
+        </li>
     </ul>
 
     <button type="submit">{{'bisonlab_reports.run'|trans({}, 'bisonlab_reports')}}</button>

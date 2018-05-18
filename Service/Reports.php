@@ -59,47 +59,57 @@ class Reports
         $report_class = new $report_config['class']($this->container);
         $config = array_merge($report_config, $config);
 
+
         // Run the report:
         $report_result = $report_class->runFixedReport($config);
 
         // Run the filter: (Coming later)
+        if (isset($config['store_server'])) {
+            // No filename, nothing to do?
+            if (!isset($config['filename']))
+                $config['filename'] = "report_from_web.csv";
+            if (strlen(dirname($config['filename']) < 2))
+                $config['filename'] = $this->default_filestore
+                    . "/" . $config['filename'];
+        }
+
         switch ($config['output_method']) {
             case 'web':
                 return $report_result;
                 break;
             case 'csv':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsCsv($config, $report_result);
                 break;
             case 'xcsv':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     // This actually does not exist..
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsXCsv($config, $report_result);
                 break;
             case 'xls2007':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     // TODO: Create this one
                     $this->printToXls2007File($config, $report_result)
                     : $this->sendAsXls2007($config, $report_result);
                 break;
             case 'xls5':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     // TODO: Create this one
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsXls5($config, $report_result);
                 break;
             case 'ods':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     // TODO: Create this one
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsOds($config, $report_result);
                 break;
             case 'pdf':
-                return isset($config['filename']) ? 
+                return isset($config['store_server']) ? 
                     // TODO: Create this one
-                    $this->PrintToPdf($config, $report_result)
+                    $this->printToPdf($config, $report_result)
                     : $this->sendAsPdf($config, $report_result);
                 break;
         }
@@ -142,11 +152,12 @@ class Reports
         $form->add('output_method', ChoiceType::class, array(
             'choices_as_values' => true,
             'choices' => array(
-                'Web'             => 'web',
-                'CSV'             => 'csv',
-                'OpenOffice Calc' => 'ods',
-                'XLS 2007'        => 'xls2007',
-                'XLS 5'           => 'xls5',
+                'Web'                   => 'web',
+                'CSV'                   => 'csv',
+                'OpenOffice Calc'       => 'ods',
+                'XLS 2007'              => 'xls2007',
+                'XLS 5'                 => 'xls5',
+                'CSV to server storage' => 'store_csv',
                 // Not yet, have to decide on a renderer and make it available
                 // somehow.
                 // https://github.com/PHPOffice/PHPExcel/blob/develop/Examples/01simple-download-pdf.php
@@ -164,8 +175,10 @@ class Reports
 
     public function sendAsCsv($config, $report_result)
     {
-        // Heavy...
-        $filename = "report.csv";
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.csv";
         header( 'Content-Type: text/csv' );
         header( 'Content-Disposition: attachment;filename='.$filename);
 
@@ -179,9 +192,8 @@ class Reports
 
     public function printToCsvFile($config, $report_result)
     {
-
         if (!isset($config['filename'])) 
-          throw new \RuntimeException("Could not open a non existent filename " );
+          throw new \RuntimeException("Can not write to a file with no name.");
 
         if (!$output_file = fopen($config['filename'], 'w'))
         {
@@ -211,64 +223,83 @@ class Reports
 
     public function sendAsXls2007($config, $report_result)
     {
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.xls";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel2007');
 
         $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=report.xls');
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }
 
     public function sendAsXls5($config, $report_result)
     {
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.xls";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel5');
 
         $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=report.xls');
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }
 
     public function sendAsOds($config, $report_result)
     {
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.ods";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         // Or is it the same as PHPOffice - OpenDocument
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OpenDocument');
-        // $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OOCalc');
 
         $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         
         $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
-        $response->headers->set('Content-Disposition', 'attachment;filename=report.ods');
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }
 
     public function sendAsXCsv($config, $report_result)
     {
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.csv";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'CSV');
 
         $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=report.csv');
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }
 
     public function sendAsPdf($config, $report_result)
     {
+        if (isset($config['filename'])) 
+            $filename = $config['filename'];
+        else
+            $filename = "report.pdf";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'PDF');
 
         $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/pdf; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=report.pdf');
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }

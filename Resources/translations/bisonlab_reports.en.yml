@@ -5,3 +5,6 @@ bisonlab_reports:
     run: Run
     criterias: Criterias
     output_as: Output as
+    specify_filename: Filename (if you need it)
+    store_server: Store the file on the server
+    when_suitable: When suitable for the report type

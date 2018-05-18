@@ -5,3 +5,6 @@ bisonlab_reports:
     run: Kjør
     criterias: Kriterier
     output_as: Vis som
+    specify_filename: Filnavn (hvis nødvendig)
+    store_server: Lagre filen på serveren
+    when_suitable: Der det passer

@@ -32,6 +32,7 @@ class BisonLabReportsCommand extends ContainerAwareCommand
                 new InputOption('list', null, InputOption::VALUE_NONE, 'A list of available reports'),
                 new InputOption('filename', '', InputOption::VALUE_REQUIRED, 'The file to write to. Default is a generated name.'),
                 new InputOption('delimiter', '', InputOption::VALUE_REQUIRED, 'Field delimiter, defaults to semicolon'),
+                new InputOption('output-method', '', InputOption::VALUE_REQUIRED, 'File format of report, default csv.'),
                 ))
                 ->setDescription('Reports')
                 ->setHelp(<<<EOT
@@ -51,6 +52,7 @@ EOT
         $this->filename   = $input->getOption('filename');
         $this->delimiter  = $input->getOption('delimiter') ? $input->getOption('delimiter') : ';';
         $this->report = $input->getOption('report') ? $input->getOption('report') : '';
+        $this->output_method    = $input->getOption('output_method') ? $input->getOption('output_method') : 'csv';
 
     }
 
@@ -80,7 +82,8 @@ EOT
             'report' => $this->report,
             'filename' => $this->filename,
             'delimiter' => $this->delimiter,
-            'output_method' => 'csv',
+            'output_method' => $this->output_method,
+            'store_server' => true
         );
 
         $reports->runFixedReport($config);

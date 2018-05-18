@@ -6,8 +6,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 /**
@@ -49,7 +52,6 @@ class ReportsController extends Controller
      */
     public function runFixedAction(Request $request, $access)
     {
-
         $reports = $this->get('bisonlab_reports');
         $config = $request->request->get('form');
         $report_result = $reports->runFixedReport($config);
@@ -72,6 +74,12 @@ class ReportsController extends Controller
             if (!isset($report_result['header']) || !$header = $report_result['header']) {
                 $header = array_keys($report_result['data'][0]);
             }
+        }
+
+        if (isset($config['store_server'])) {
+            $this->get('session')->getFlashBag()
+                ->add('info', "Report stored.");
+            return $this->redirect($this->generateUrl('reports'));
         }
 
         return $this->render('BisonLabReportsBundle:Reports:run.html.twig',
@@ -120,6 +128,7 @@ class ReportsController extends Controller
 
     private function createReportFormBuilder($reports)
     {
+        $translator = $this->get('translator');
         $choices = array();
         $required = array();
         foreach ($reports as $r => $c) {
@@ -130,7 +139,12 @@ class ReportsController extends Controller
             ->add('report', ChoiceType::class, array(
                 'choices' => $choices,
                 'choices_as_values' => true)
-                );
+                )
+            ->add('filename', TextType::class, array('required' => false))
+            ->add('store_server', CheckboxType::class,
+                // array('required' => false, 'label' => $translator->trans('bisonlab_reports.store_server')))
+                array('required' => false, 'label' => $translator->trans('Store the file on the server')));
+            ;
 
         return $report_form_builder;
     }
