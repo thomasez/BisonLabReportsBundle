@@ -145,7 +145,6 @@ class ReportsController extends Controller
                 // array('required' => false, 'label' => $translator->trans('bisonlab_reports.store_server')))
                 array('required' => false, 'label' => $translator->trans('Store the file on the server')));
             ;
-
         return $report_form_builder;
     }
 

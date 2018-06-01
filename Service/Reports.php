@@ -8,11 +8,11 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class Reports 
 {
-    private $report_classes;
-    private $picker_list;
-    private $report_list;
-    private $default_filestore;
-    private $container;
+    private $report_classes = array();
+    private $picker_list = array();
+    private $report_list = array();
+    private $default_filestore = null;
+    private $container = null;
 
     public function __construct($container, $report_classes = array(), $default_filestore = null)
     {
@@ -37,9 +37,25 @@ class Reports
         }
     }
 
-    public function getReports()
+    /*
+     * Cheating? maybe. But gotta security check.
+     */
+    public function getReports($all = false)
     {
-        return $this->report_list;
+        if ($all)
+            return $this->report_list;
+        $reports = array();
+        foreach ($this->report_list as $n => $r) {
+            if (isset($r['role'])) {
+                if ($this->container->get('security.authorization_checker')
+                        ->isGranted($r['role'])) {
+                    $reports[$n] = $r;
+                }
+            } else {
+                $reports[$n] = $r;
+            }
+        }
+        return $reports;
     }
 
     public function getPickers()
@@ -55,6 +71,11 @@ class Reports
             throw new InvalidArgumentException('There are no such report');
         }
         $report_config = $this->report_list[$report];
+        if (isset($report_config['role']) &&
+            !$this->container->get('security.authorization_checker')
+                    ->isGranted($report_config['role'])) {
+            throw new \Exception("No will do");
+        }
 
         $report_class = new $report_config['class']($this->container);
         $config = array_merge($report_config, $config);
