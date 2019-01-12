@@ -2,8 +2,60 @@
 
 {% block content %}
 
+<script>
+function printDataInNewPage()
+{
+   var divToPrint=document.getElementById("reports_table");
+   newWin= window.open("");
+   newWin.document.write(divToPrint.outerHTML);
+   newWin.print();
+   newWin.close();
+}
+
+$(document).ready(function() {
+    $('#printbutton').on('click',function(){
+    /* printDataInNewPage(); */
+    /*
+     * If we hide most of the page, print and then show again, we have a nice
+     * printout. But the issue is that we do  not know what to hide, since this
+     * is a generic bundle.
+     * Pretty sure it's possible to traverse backwards from the table itself,
+     * but must be some work.
+     * And after that, go back through and show again.
+     */
+
+    /*
+     * The hack'y, but reasonable option is to just hide the header.
+     * But hiding will not release the space taken up by the header and then
+     * it'll look stupid. Gotta handle that aswell.
+     * The Print button and eventual datatables buttons has to be hidden aswell.
+     */
+    if ($('#reports_table >tbody >tr').length > 200) {
+        $('#reports_table').dataTable({
+            "destroy": true,
+            "paging": false,
+            "order": []
+            });
+    }
+    $("header").hide();
+    // This may be a bit specific for my designs,
+    document.body.style.paddingTop = "0px";
+    $("h1").hide();
+    $("button").hide();
+    $("label").hide();
+    window.print();
+    document.body.style.paddingTop = "";
+    $("h1").show();
+    $("label").show();
+    $("header").show();
+    $("button").show();
+    })
+})
+</script>
+
 <h1><strong> {{ report.report }} </strong> </h1>
 
+<button id="printbutton">Print me</button>
 <table class="record_properties" id="reports_table">
     <thead>
     <tr>
@@ -30,7 +82,7 @@
 <script type="text/javascript">
 $(document).ready(function()
     {
-        if ($('#reports_table >tbody >tr').lengt > 200) {
+        if ($('#reports_table >tbody >tr').length > 200) {
             $('#reports_table').dataTable({
                 "order": [],
                 "pageLength": 200,
