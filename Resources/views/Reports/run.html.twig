@@ -57,8 +57,16 @@ $(document).ready(function() {
     $("button").hide();
     $("label").hide();
     $("input").hide();
+    $(".dataTables_info").hide();
+    $(".dataTables_filter").hide();
+    $(".dataTables_paginate").hide();
+    $(".dataTables_length").hide();
     window.print();
     document.body.style.paddingTop = "";
+    $(".dataTables_length").show();
+    $(".dataTables_paginate").show();
+    $(".dataTables_filter").show();
+    $(".dataTables_info").show();
     $("h1").show();
     $("input").show();
     $("label").show();
