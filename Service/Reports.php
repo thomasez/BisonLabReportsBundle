@@ -195,10 +195,7 @@ class Reports
 
     public function sendAsCsv($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.csv";
+        $filename = $config['filename'] ?: "report.csv";
         header( 'Content-Type: text/csv' );
         header( 'Content-Disposition: attachment;filename='.$filename);
 
@@ -225,7 +222,7 @@ class Reports
 
     public function createCsv(&$output_file, $config, $report_result)
     {
-        $delimiter = isset($config['delimiter']) ? $config['delimiter'] : ",";
+        $delimiter = $config['delimiter'] ?: ",";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);
@@ -240,10 +237,7 @@ class Reports
 
     public function sendAsXls2007($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.xls";
+        $filename = $config['filename'] ?: "report.xls";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel2007');
 
@@ -256,10 +250,7 @@ class Reports
 
     public function sendAsXls5($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.xls";
+        $filename = $config['filename'] ?: "report.xls";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel5');
 
@@ -273,10 +264,7 @@ class Reports
 
     public function sendAsOds($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.ods";
+        $filename = $config['filename'] ?: "report.ods";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         // Or is it the same as PHPOffice - OpenDocument
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OpenDocument');
@@ -291,10 +279,7 @@ class Reports
 
     public function sendAsXCsv($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.csv";
+        $filename = $config['filename'] ?: "report.csv";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'CSV');
 
@@ -307,10 +292,7 @@ class Reports
 
     public function sendAsPdf($config, $report_result)
     {
-        if (isset($config['filename'])) 
-            $filename = $config['filename'];
-        else
-            $filename = "report.pdf";
+        $filename = $config['filename'] ?: "report.pdf";
         $eobject = $this->compilePhpExelObject($config, $report_result);
         $writer = $this->container->get('phpexcel')->createWriter($eobject, 'PDF');
 

@@ -12,6 +12,7 @@
         }
     ],
     "require": {
+        "php": "^7.0",
         "liuggio/ExcelBundle": "2.0.*@dev",
         "symfony/framework-bundle": ">=2.8"
     },
