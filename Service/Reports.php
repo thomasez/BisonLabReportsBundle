@@ -80,7 +80,6 @@ class Reports
         $report_class = new $report_config['class']($this->container);
         $config = array_merge($report_config, $config);
 
-
         // Run the report:
         $report_result = $report_class->runFixedReport($config);
 
@@ -159,7 +158,7 @@ class Reports
         // the controller if web.
 
         if ($config['output_method'] == "web") {
-        return $serializer->serialize($data, 'json');
+            return $serializer->serialize($data, 'json');
             return $data;
         }
     }
@@ -216,19 +215,17 @@ class Reports
         if (!isset($config['filename'])) 
           throw new \RuntimeException("Can not write to a file with no name.");
 
-        if (!$output_file = fopen($config['filename'], 'w'))
-        {
+        if (!$output_file = fopen($config['filename'], 'w')) {
           throw new \RuntimeException("Could not open file " 
                 . $config['filename'] . " for writing");
         }
-
         $this->createCsv($output_file, $config, $report_result);
         fclose($output_file);
     }
 
     public function createCsv(&$output_file, $config, $report_result)
     {
-        $delimiter = isset($config['delimiter']) ? $config['delimiter'] : ";";
+        $delimiter = isset($config['delimiter']) ? $config['delimiter'] : ",";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);
@@ -236,8 +233,7 @@ class Reports
 
         fputcsv($output_file, $header, $delimiter);
 
-        foreach ($report_result['data'] as $line) 
-        {
+        foreach ($report_result['data'] as $line) {
             fputcsv($output_file, $line, $delimiter);
         }
     }
