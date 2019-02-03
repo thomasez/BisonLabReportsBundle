@@ -4,7 +4,6 @@ namespace BisonLab\ReportsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\HttpFoundation\Response;
@@ -47,8 +46,7 @@ class ReportsController extends Controller
 
     /**
      * Run report
-     * @Route("/run", name="reports_run_fixed");
-     * @Method("POST")
+     * @Route("/run", name="reports_run_fixed", methods={"POST"});
      */
     public function runFixedAction(Request $request, $access)
     {
@@ -93,8 +91,7 @@ class ReportsController extends Controller
 
     /**
      * Not in use, old relic and seems to be a good plan somehow.
-     * @Route("/run_compiled", name="reports_run_compiled");
-     * @Method("POST")
+     * @Route("/run_compiled", name="reports_run_compiled", methods={"POST"});
      */
     public function runCompiledAction(Request $request, $access)
     {
