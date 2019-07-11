@@ -1,5 +1,20 @@
 {% extends "BisonLabReportsBundle::layout.html.twig" %}
 
+{#
+This is the css/js files used here. Or rather than just copy this into your scrip load page or whatever you have, pull minifiles compbined at https://datatables.net/download/
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css">
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.flash.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.print.min.js"></script>
+#}
+
+
 {% block content %}
 
 <script>
@@ -84,7 +99,9 @@ $(document).ready(function() {
 <input id="check_{{ loop.index }}" type="checkbox" onClick='checkChecked("{{ loop.index }}");' checked>{{ elem }}</input>
 {% endfor %}
 <br>
-<button id="printbutton">Print me</button>
+{# Maybe datatables does this better?
+  <button id="printbutton">Print me</button>
+#}
 <table class="record_properties table-striped display compact" id="reports_table" style="width:100%">
     <thead>
     <tr>
@@ -115,13 +132,18 @@ $(document).ready(function()
             $('#reports_table').dataTable({
                 "order": [],
                 "pageLength": 200,
-                "lengthMenu": [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]]
-                });
+                "lengthMenu": [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]],
+                "searching": true,
+                "dom": 'Bfrtip',
+                "buttons": [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+            });
         } else {
             $('#reports_table').dataTable({
                 "paging": false,
-                "order": []
-                });
+                "order": [],
+                "dom": 'Bfrtip',
+                "buttons": [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+            });
         }
     }
 );
