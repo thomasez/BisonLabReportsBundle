@@ -23,56 +23,58 @@ function printDataInNewPage()
 }
 
 $(document).ready(function() {
-    $('#printbutton').on('click',function(){
-    /* This does not take style into consideration, and if we hide table
-     * columns it will print those aswell.
-     */
-    // printDataInNewPage();
-    /*
-     * If we hide most of the page, print and then show again, we have a nice
-     * printout. But the issue is that we do  not know what to hide, since this
-     * is a generic bundle.
-     * Pretty sure it's possible to traverse backwards from the table itself,
-     * but must be some work.
-     * And after that, go back through and show again.
-     */
 
-    /*
-     * The hack'y, but reasonable option is to just hide the header.
-     * But hiding will not release the space taken up by the header and then
-     * it'll look stupid. Gotta handle that aswell.
-     * The Print button and eventual datatables buttons has to be hidden aswell.
-     */
-    if ($('#reports_table >tbody >tr').length > 200) {
-        $('#reports_table').dataTable({
-            "destroy": true,
-            "paging": false,
-            "order": []
-            });
-    }
-    $("header").hide();
-    // This may be a bit specific for my designs,
-    document.body.style.paddingTop = "0px";
-    $("h1").hide();
-    $("button").hide();
-    $("label").hide();
-    $("input").hide();
-    $(".dataTables_info").hide();
-    $(".dataTables_filter").hide();
-    $(".dataTables_paginate").hide();
-    $(".dataTables_length").hide();
-    window.print();
-    document.body.style.paddingTop = "";
-    $(".dataTables_length").show();
-    $(".dataTables_paginate").show();
-    $(".dataTables_filter").show();
-    $(".dataTables_info").show();
-    $("h1").show();
-    $("input").show();
-    $("label").show();
-    $("header").show();
-    $("button").show();
+    $('#printbutton').on('click',function(){
+        /* This does not take style into consideration, and if we hide table
+         * columns it will print those aswell.
+         */
+        // printDataInNewPage();
+        /*
+         * If we hide most of the page, print and then show again, we have a nice
+         * printout. But the issue is that we do  not know what to hide, since this
+         * is a generic bundle.
+         * Pretty sure it's possible to traverse backwards from the table itself,
+         * but must be some work.
+         * And after that, go back through and show again.
+         */
+
+        /*
+         * The hack'y, but reasonable option is to just hide the header.
+         * But hiding will not release the space taken up by the header and then
+         * it'll look stupid. Gotta handle that aswell.
+         * The Print button and eventual datatables buttons has to be hidden aswell.
+         */
+        if ($('#reports_table >tbody >tr').length > 200) {
+            $('#reports_table').dataTable({
+                "destroy": true,
+                "paging": false,
+                "order": []
+                });
+        }
+        $("header").hide();
+        // This may be a bit specific for my designs,
+        document.body.style.paddingTop = "0px";
+        $("h1").hide();
+        $("button").hide();
+        $("label").hide();
+        $("input").hide();
+        $(".dataTables_info").hide();
+        $(".dataTables_filter").hide();
+        $(".dataTables_paginate").hide();
+        $(".dataTables_length").hide();
+        window.print();
+        document.body.style.paddingTop = "";
+        $(".dataTables_length").show();
+        $(".dataTables_paginate").show();
+        $(".dataTables_filter").show();
+        $(".dataTables_info").show();
+        $("h1").show();
+        $("input").show();
+        $("label").show();
+        $("header").show();
+        $("button").show();
     })
+
 })
 </script>
 
