@@ -95,12 +95,15 @@ $(document).ready(function() {
 
 <h1><strong> {{ report.report }} </strong> </h1>
 
+{# Maybe datatables does this better?
+  (The answer is more or less guaranteed to be "Yes". Keeping the code forr  a revsion or two anyway.)
+
 {% for elem in header %}
 <input id="check_{{ loop.index }}" type="checkbox" onClick='checkChecked("{{ loop.index }}");' checked>{{ elem }}</input>
 {% endfor %}
 <br>
-{# Maybe datatables does this better?
-  <button id="printbutton">Print me</button>
+<button id="printbutton">Print me</button>
+
 #}
 <table class="record_properties table-striped display compact" id="reports_table" style="width:100%">
     <thead>
@@ -130,19 +133,83 @@ $(document).ready(function()
     {
         if ($('#reports_table >tbody >tr').length > 200) {
             $('#reports_table').dataTable({
-                "order": [],
-                "pageLength": 200,
-                "lengthMenu": [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]],
-                "searching": true,
-                "dom": 'Bfrtip',
-                "buttons": [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+                order: [],
+                pageLength: 200,
+                lengthMenu: [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]],
+                searching: true,
+                dom: 'Bfrtip',
+                buttons: [ 
+                    {
+                        "extend": 'copy',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'excel',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'csv',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'pdf',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'print',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    'colvis'
+                ]
             });
         } else {
             $('#reports_table').dataTable({
-                "paging": false,
-                "order": [],
-                "dom": 'Bfrtip',
-                "buttons": [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+                paging: false,
+                order: [],
+                dom: 'Bfrtip',
+                buttons: [ 
+                    {
+                        "extend": 'copy',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'excel',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'csv',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'pdf',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    {
+                        "extend": 'print',
+                        "exportOptions": {
+                            "columns": ':visible'
+                        }
+                    },
+                    'colvis'
+                ]
             });
         }
     }
