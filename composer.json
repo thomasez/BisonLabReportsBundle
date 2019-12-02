@@ -12,9 +12,10 @@
         }
     ],
     "require": {
-        "php": "^7.0",
-        "liuggio/ExcelBundle": "2.0.*@dev",
-        "symfony/framework-bundle": ">=2.8"
+        "php": "^7.2",
+        "phpoffice/phpspreadsheet": "^1.10",
+        "mpdf/mpdf": "^8.0",
+        "symfony/framework-bundle": ">=3.4"
     },
     "autoload": {
         "psr-4": { "BisonLab\\ReportsBundle\\": "" }

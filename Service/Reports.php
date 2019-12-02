@@ -5,6 +5,9 @@ namespace BisonLab\ReportsBundle\Service;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Reports 
 {
@@ -177,6 +180,7 @@ class Reports
                 'OpenOffice Calc'       => 'ods',
                 'XLS 2007'              => 'xls2007',
                 'XLS 5'                 => 'xls5',
+                'PDF'                   => 'pdf',
                 'CSV to server storage' => 'store_csv',
                 // Not yet, have to decide on a renderer and make it available
                 // somehow.
@@ -238,10 +242,11 @@ class Reports
     public function sendAsXls2007($config, $report_result)
     {
         $filename = $config['filename'] ?: "report.xls";
-        $eobject = $this->compilePhpExelObject($config, $report_result);
-        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel2007');
+        $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
-        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
@@ -251,11 +256,11 @@ class Reports
     public function sendAsXls5($config, $report_result)
     {
         $filename = $config['filename'] ?: "report.xls";
-        $eobject = $this->compilePhpExelObject($config, $report_result);
-        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'Excel5');
+        $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
-        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
-        
+        $writer = IOFactory::createWriter($spreadsheet, 'Xls');
+
+        $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
@@ -265,12 +270,11 @@ class Reports
     public function sendAsOds($config, $report_result)
     {
         $filename = $config['filename'] ?: "report.ods";
-        $eobject = $this->compilePhpExelObject($config, $report_result);
-        // Or is it the same as PHPOffice - OpenDocument
-        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'OpenDocument');
+        $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
-        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
-        
+        $writer = IOFactory::createWriter($spreadsheet, 'Ods');
+
+        $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
@@ -280,10 +284,11 @@ class Reports
     public function sendAsXCsv($config, $report_result)
     {
         $filename = $config['filename'] ?: "report.csv";
-        $eobject = $this->compilePhpExelObject($config, $report_result);
-        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'CSV');
+        $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
-        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
+        $writer = IOFactory::createWriter($spreadsheet, 'Csv');
+
+        $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
@@ -293,56 +298,74 @@ class Reports
     public function sendAsPdf($config, $report_result)
     {
         $filename = $config['filename'] ?: "report.pdf";
-        $eobject = $this->compilePhpExelObject($config, $report_result);
-        $writer = $this->container->get('phpexcel')->createWriter($eobject, 'PDF');
+        $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
+        $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
 
-        $response = $this->container->get('phpexcel')->createStreamedResponse($writer);
+        $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/pdf; charset=utf-8');
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
 
         return $response;
     }
 
-    public function compilePhpExelObject($config, $report_result)
+    public function compilePhpSpreadsheet($config, $report_result)
     {
-        // TODO: Make this configureable. Either through the config argument or
-        // parameters.yml/config.yml
-        $eobject = $this->container->get('phpexcel')->createPHPExcelObject();
-
-        $eobject->getProperties()->setCreator("BisonLab Reports Bundle")
-                ->setLastModifiedBy("BisonLab Reports Bundle")
-                ->setTitle("Report")
-                ->setCategory("Report")
-                ->setSubject("Report");
-
-        if (!isset($report_result['header']) || !$header = $report_result['header']) {
+        /*
+         * Prepare and handle config options.
+         */
+        if (!isset($report_result['header'])
+                || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);
         }
+        $title = $config['title'] ?? 'Report';
+        $category = $config['category'] ?? 'Report';
+        $subject = $config['subject'] ?? 'Report';
+        $creator = $config['creator'] ?? 'BisonLab Reports Bundle';
+        $last_mod = $config['last_mod'] ?? 'BisonLab Reports Bundle';
 
-        $col = 0;
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getProperties()
+                ->setCreator($creator)
+                ->setLastModifiedBy($last_mod)
+                ->setTitle($title)
+                ->setCategory($category)
+                ->setSubject($subject);
+
+        // Set active sheet index to the first sheet, so Excel opens this as
+        // the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $col = 1;
         $row = 1;
         foreach ($header as $head) {
-            $eobject->setActiveSheetIndex(0)
-                ->setCellValueExplicitByColumnAndRow($col, $row, $head);
+            $spreadsheet->getActiveSheet()
+                ->setCellValueByColumnAndRow($col, $row, $head);
             $col++;
         }
         $row++;
 
         foreach ($report_result['data'] as $line) 
         {
-            $col = 0;
+            $col = 1;
             foreach ($line as $coldata) {
-                $eobject->setActiveSheetIndex(0)
-                    ->setCellValueExplicitByColumnAndRow($col, $row, $coldata);
+                $spreadsheet->getActiveSheet()
+                    ->setCellValueByColumnAndRow($col, $row, $coldata);
                 $col++;
             }
             $row++;
         }
 
-        $eobject->getActiveSheet()->setTitle('Inventory Report');
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $eobject->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setTitle($title);
 
-        return $eobject;
+        return $spreadsheet;
+    }
+
+    private function _createStreamedResponse($writer, $headers = array())
+    {
+        return new StreamedResponse(
+            function () use ($writer) {
+                $writer->save('php://output');
+            }
+        );
     }
 }
