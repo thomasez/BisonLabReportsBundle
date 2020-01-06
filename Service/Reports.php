@@ -172,9 +172,7 @@ class Reports
      */
     public function addOutputChoicesToForm(&$form)
     {
-        $form->add('output_method', ChoiceType::class, array(
-            'choices_as_values' => true,
-            'choices' => array(
+        $choices = [
                 'Web'                   => 'web',
                 'CSV'                   => 'csv',
                 'OpenOffice Calc'       => 'ods',
@@ -182,12 +180,10 @@ class Reports
                 'XLS 5'                 => 'xls5',
                 'PDF'                   => 'pdf',
                 'CSV to server storage' => 'store_csv',
-                // Not yet, have to decide on a renderer and make it available
-                // somehow.
-                // https://github.com/PHPOffice/PHPExcel/blob/develop/Examples/01simple-download-pdf.php
-                // 'pdf' => 'PDF', 
-                // Not in Luiggios Bundle 'xcsv' => 'xCSV', 
-            )));
+        ];
+        $form->add('output_method', ChoiceType::class, array(
+            'choices' => $choices,
+            ));
     }
 
     public function addCriteriasToForm(&$form)
@@ -226,7 +222,7 @@ class Reports
 
     public function createCsv(&$output_file, $config, $report_result)
     {
-        $delimiter = $config['delimiter'] ?: ",";
+        $delimiter = $config['delimiter'] ?? ",";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
             $header = array_keys($report_result['data'][0]);

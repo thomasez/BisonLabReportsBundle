@@ -117,8 +117,7 @@ class ReportsController extends Controller
         $picker_form_builder = $this->createFormBuilder()
             ->add('pickers', ChoiceType::class, array(
                 'choices' => $choices,
-                'choices_as_values' => true)
-                );
+                ));
 
         return $picker_form_builder;
     }
