@@ -17,14 +17,11 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('bisonlab_reports');
+        $treeBuilder = new TreeBuilder('bisonlab_reports');
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
-
-               // ->scalarNode('default_filestore')->defaultValue('/tmp')->cannotBeEmpty()->end()
         $rootNode
             ->children()
                 ->scalarNode('default_filestore')->end()
