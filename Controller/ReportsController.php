@@ -15,7 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 /**
  * User controller.
  *
- * @Route("/{access}/reports", defaults={"access" = "web"}, requirements={"web|rest"})
+ * @Route("/{access}/bisonlab_reports", defaults={"access": "web"}, requirements={"access": "web|rest|ajax"})
  */
 class ReportsController extends Controller
 {
@@ -37,7 +37,7 @@ class ReportsController extends Controller
         $reports->addCriteriasToForm($report_form_builder);
         $reports->addOutputChoicesToForm($report_form_builder);
 
-        return $this->render('BisonLabReportsBundle:Reports:index.html.twig',
+        return $this->render('@BisonLabReports/Reports/index.html.twig',
             array(
             'picker_form' => $picker_form_builder->getForm()->createView(),
             'report_form' => $report_form_builder->getForm()->createView(),
@@ -80,7 +80,7 @@ class ReportsController extends Controller
             return $this->redirect($this->generateUrl('reports'));
         }
 
-        return $this->render('BisonLabReportsBundle:Reports:run.html.twig',
+        return $this->render('@BisonLabReports/Reports/run.html.twig',
             array(
                 'header' => $header,
                 'report' => $config,
@@ -102,7 +102,7 @@ class ReportsController extends Controller
         if (!isset($data['header']) || !$header = $data['header']) {
             $header = array_keys($report_result['data'][0]);
         }
-        return $this->render('BisonLabReportsBundle:Reports:run.html.twig',
+        return $this->render('@BisonLabReports/Reports/run.html.twig',
             $report_result);
     }
 
