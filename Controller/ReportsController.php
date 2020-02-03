@@ -3,10 +3,11 @@
 namespace BisonLab\ReportsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
-
 use Symfony\Component\HttpFoundation\Response;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -17,15 +18,24 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
  *
  * @Route("/{access}/bisonlab_reports", defaults={"access": "web"}, requirements={"access": "web|rest|ajax"})
  */
-class ReportsController extends Controller
+class ReportsController extends AbstractController
 {
+    private $reports;
+    private $translator;
+
+    public function __construct($reports, $translator)
+    { 
+        $this->reports = $reports;
+        $this->translator = $translator;
+    }
+
     /**
      * Lists all available reports
      * @Route("/", name="reports");
      */
     public function indexAction($access)
     {
-        $reports = $this->get('bisonlab_reports');
+        $reports = $this->reports;
 
         // $reports = $reports->getReports();
         $picker_form_builder = $this->createPickerFormBuilder($reports->getPickers());
@@ -50,9 +60,8 @@ class ReportsController extends Controller
      */
     public function runFixedAction(Request $request, $access)
     {
-        $reports = $this->get('bisonlab_reports');
         $config = $request->request->get('form');
-        $report_result = $reports->runFixedReport($config);
+        $report_result = $this->reports->runFixedReport($config);
 
         // All is just done and finished.
         if (true === $report_result) {
@@ -95,10 +104,9 @@ class ReportsController extends Controller
      */
     public function runCompiledAction(Request $request, $access)
     {
-        $reports = $this->get('bisonlab_reports');
         $config = $request->request->get('form');
 
-        $report_result = $reports->runCompiledReport($config);
+        $report_result = $this->reports->runCompiledReport($config);
         if (!isset($data['header']) || !$header = $data['header']) {
             $header = array_keys($report_result['data'][0]);
         }
@@ -124,7 +132,6 @@ class ReportsController extends Controller
 
     private function createReportFormBuilder($reports)
     {
-        $translator = $this->get('translator');
         $choices = array();
         $required = array();
         foreach ($reports as $r => $c) {
@@ -132,14 +139,10 @@ class ReportsController extends Controller
         }
 
         $report_form_builder = $this->createFormBuilder()
-            ->add('report', ChoiceType::class, array(
-                'choices' => $choices,
-                'choices_as_values' => true)
-                )
+            ->add('report', ChoiceType::class, array('choices' => $choices))
             ->add('filename', TextType::class, array('required' => false))
             ->add('store_server', CheckboxType::class,
-                // array('required' => false, 'label' => $translator->trans('bisonlab_reports.store_server')))
-                array('required' => false, 'label' => $translator->trans('Store the file on the server')));
+                array('required' => false, 'label' => $this->translator->trans('Store the file on the server')));
             ;
         return $report_form_builder;
     }

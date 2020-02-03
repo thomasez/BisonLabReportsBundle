@@ -1,8 +1,17 @@
 services:
-    BisonLab\ReportsBundle\Command\:
-        resource: '../../Command/*'
-        tags: ['console.command']
-
     bisonlab_reports:
         class: BisonLab\ReportsBundle\Service\Reports
         arguments: ['@service_container', '%bisonlab_reports.report_classes%',  '%bisonlab_reports.default_filestore%']
+
+    BisonLab\ReportsBundle\Command\:
+        resource: '../../Command/*'
+        tags: ['console.command']
+        arguments: ['@bisonlab_reports']
+
+    BisonLab\ReportsBundle\Controller\:
+        resource: '../../Controller/*'
+        tags: ['controller.service_arguments']
+        arguments: ['@bisonlab_reports', '@translator']
+        # AbstractController still needs this!
+        calls: 
+            - [ setContainer, ['@service_container'] ]
