@@ -1,4 +1,4 @@
 BisonLabReportsBundle
 ================================
 
-A Symfony 2 bundle for creating reports
+A Symfony bundle for creating reports.

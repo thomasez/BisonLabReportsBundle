@@ -14,7 +14,7 @@
     "require": {
         "phpoffice/phpspreadsheet": "^1.10",
         "mpdf/mpdf": "^8.0",
-        "symfony/framework-bundle": "^3.4 || ^4.0"
+        "symfony/framework-bundle": "^4.4 || ^5.0"
     },
     "autoload": {
         "psr-4": { "BisonLab\\ReportsBundle\\": "" }
