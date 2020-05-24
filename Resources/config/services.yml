@@ -1,7 +1,7 @@
 services:
     bisonlab_reports:
         class: BisonLab\ReportsBundle\Service\Reports
-        arguments: ['@service_container', '%bisonlab_reports.report_classes%',  '%bisonlab_reports.default_filestore%']
+        arguments: ['@service_container', '%bisonlab_reports%']
 
     BisonLab\ReportsBundle\Command\:
         resource: '../../Command/*'

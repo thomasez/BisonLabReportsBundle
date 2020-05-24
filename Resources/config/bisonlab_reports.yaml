@@ -1,5 +1,5 @@
 parameters:
     bisonlab_reports:
-        report_classes: null
+        report_classes: []
         default_filestore: /tmp
 

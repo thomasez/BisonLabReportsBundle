@@ -17,10 +17,11 @@ class Reports
     private $default_filestore = null;
     private $container = null;
 
-    public function __construct($container, $report_classes = array(), $default_filestore = null)
+    public function __construct($container, $config = [])
     {
         $this->container         = $container;
-        $this->default_filestore = $default_filestore;
+        $this->default_filestore = $config['default_filestore'] ?? null;
+        $report_classes = $config['report_classes'] ?? [];
 
         foreach ($report_classes as $class) {
             $rep_obj = new $class($container, array());
