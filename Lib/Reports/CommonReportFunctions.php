@@ -4,24 +4,14 @@ namespace BisonLab\ReportsBundle\Lib\Reports;
 
 class CommonReportFunctions
 {
-
-    private $router;
-    private $manager;
-
     public function getManager()
     {
-        if (!$this->manager) {
-            $this->manager = $this->container->get('doctrine')->getManager();
-        }
-        return $this->manager;
+        return $this->container->get('doctrine')->getManager();
     } 
 
     public function getRouter()
     {
-        if (!$this->router) {
-            $this->router = $this->container->get('router');
-        }
-        return $this->router;
+        return $this->container->get('router');
     }
 
     public function createUrlFor($path, $values)
