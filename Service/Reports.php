@@ -91,11 +91,16 @@ class Reports
         if (isset($config['store_server'])) {
             // No filename, nothing to do?
             if (!isset($config['filename']))
-                $config['filename'] = "report_from_web.csv";
+                $config['filename'] = "report_from_web";
             if (strlen(dirname($config['filename']) < 2))
                 $config['filename'] = $this->default_filestore
                     . "/" . $config['filename'];
         }
+
+        // Remove extensions. Will be added later.
+        if (empty($config['filename'] ?? null))
+            $config['filename'] = "generated_report";
+        $config['filename'] = preg_replace('/\.\w\w\w$/', '', $config['filename']);
 
         switch ($config['output_method']) {
             case 'web':
@@ -196,7 +201,7 @@ class Reports
 
     public function sendAsCsv($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.csv";
+        $filename = $config['filename'] . ".csv" ?: "report.csv";
         header( 'Content-Type: text/csv' );
         header( 'Content-Disposition: attachment;filename='.$filename);
 
@@ -213,7 +218,7 @@ class Reports
         if (!isset($config['filename'])) 
           throw new \RuntimeException("Can not write to a file with no name.");
 
-        if (!$output_file = fopen($config['filename'], 'w')) {
+        if (!$output_file = fopen($config['filename'] . ".csv", 'w')) {
           throw new \RuntimeException("Could not open file " 
                 . $config['filename'] . " for writing");
         }
@@ -238,7 +243,7 @@ class Reports
 
     public function sendAsXls2007($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.xls";
+        $filename = $config['filename'] . ".xls" ?: "report.xls";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -252,7 +257,7 @@ class Reports
 
     public function sendAsXls5($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.xls";
+        $filename = $config['filename'] . ".xls" ?: "report.xls";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xls');
@@ -266,7 +271,7 @@ class Reports
 
     public function sendAsOds($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.ods";
+        $filename = $config['filename'] . ".ods" ?: "report.ods";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Ods');
@@ -280,7 +285,7 @@ class Reports
 
     public function sendAsXCsv($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.csv";
+        $filename = $config['filename'] . ".csv" ?: "report.csv";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Csv');
@@ -294,7 +299,7 @@ class Reports
 
     public function sendAsPdf($config, $report_result)
     {
-        $filename = $config['filename'] ?: "report.pdf";
+        $filename = $config['filename'] . ".pdf" ?: "report.pdf";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
         $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
 
