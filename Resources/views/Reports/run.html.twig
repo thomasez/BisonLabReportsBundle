@@ -108,6 +108,7 @@ $(document).ready(function() {
 <table class="record_properties table-striped display compact" id="reports_table" style="width:100%">
     <thead>
     <tr>
+      {% set hcount = header | length %}
       {% for elem in header %}
         <th class="bisrep_{{ loop.index }}">{{ elem }}</th>
       {% endfor %}
@@ -116,12 +117,17 @@ $(document).ready(function() {
     <tbody>
       {% for row in data %}
         <tr>
+            {% set rcount = row | length %}
+            {% set rest = hcount - rcount %}
             {% for col in row %}
                 {% if col is not empty %}
                         <td class="bisrep_{{ loop.index }}">{{ col | raw }}</td>
                 {% else %}
                         <td class="bisrep_{{ loop.index }}">&nbsp;</td>
                 {% endif %}
+           {% endfor %}
+           {% for r in 1..rest %}
+                <td class="bisrep_{{ rcount - r }}">&nbsp;</td>
            {% endfor %}
         </tr>
       {% endfor %}
