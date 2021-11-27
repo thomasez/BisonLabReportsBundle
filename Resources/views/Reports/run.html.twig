@@ -126,9 +126,11 @@ $(document).ready(function() {
                         <td class="bisrep_{{ loop.index }}">&nbsp;</td>
                 {% endif %}
            {% endfor %}
-           {% for r in 1..rest %}
-                <td class="bisrep_{{ rcount - r }}">&nbsp;</td>
-           {% endfor %}
+           {% if rest > 0 %}
+               {% for r in 1..rest %}
+                    <td class="bisrep_{{ rcount - r }}">&nbsp;</td>
+               {% endfor %}
+           {% endif %}
         </tr>
       {% endfor %}
     </tbody>
