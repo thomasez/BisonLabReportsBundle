@@ -57,7 +57,7 @@ EOT
         $this->output_method = $input->getOption('output-method') ? $input->getOption('output_method') : 'csv';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -69,13 +69,13 @@ EOT
             foreach($this->reports->getReports() as $name => $config) {
                 $output->writeln($name . "\t\t" . $config['description']);
             }
-            exit;
+            return 1;
         }
 
         if (!$this->filename)
         {
            $output->writeln("I do need a filename");
-           exit;
+           return 1;
         }
     
         // Ok, prepare the config:
@@ -87,5 +87,6 @@ EOT
             'store_server' => true
         );
         $reports->runFixedReport($config);
+        return 1;
     }
 }
