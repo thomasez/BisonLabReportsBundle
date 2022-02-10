@@ -1,0 +1,15 @@
+services:
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    BisonLab\ReportsBundle\:
+        resource: '../'
+        exclude:
+            - '../DependencyInjection/'
+            - '../Lib/'
+
+#    BisonLab\ReportsBundle\Command\:
+#        resource: '../Command/*'
+#        tags: ['console.command']
+#        arguments: ['@bisonlab_reports']

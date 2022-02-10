@@ -2,12 +2,15 @@
 
 namespace BisonLab\ReportsBundle\Service;
 
-use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class Reports 
 {
@@ -15,16 +18,24 @@ class Reports
     private $picker_list = array();
     private $report_list = array();
     private $default_filestore = null;
-    private $container = null;
+    private $entityManager = null;
+    private $authChecker = null;
+    private $serializer = null;
+    private $router = null;
 
-    public function __construct($container, $config = [])
+    public function __construct(ParameterBagInterface $pbag, EntityManagerInterface $entityManager, AuthorizationCheckerInterface $authChecker, SerializerInterface $serializer, RouterInterface $router)
     {
-        $this->container         = $container;
+        $this->entityManager = $entityManager;
+        $this->authChecker = $authChecker;
+        $this->serializer = $serializer;
+        $this->router = $router;
+
+        $config = $pbag->get('bisonlab_reports');
         $this->default_filestore = $config['default_filestore'] ?? null;
         $report_classes = $config['report_classes'] ?? [];
 
         foreach ($report_classes as $class) {
-            $rep_obj = new $class($container, array());
+            $rep_obj = new $class($this->entityManager, array());
 
             $this->report_classes[] = $rep_obj;
             $pickers = $rep_obj->getPickerFunctions();
@@ -51,7 +62,7 @@ class Reports
         $reports = array();
         foreach ($this->report_list as $n => $r) {
             if (isset($r['role'])) {
-                if ($this->container->get('security.authorization_checker')
+                if ($this->authChecker->get('security.authorization_checker')
                         ->isGranted($r['role'])) {
                     $reports[$n] = $r;
                 }
@@ -76,12 +87,12 @@ class Reports
         }
         $report_config = $this->report_list[$report];
         if (isset($report_config['role']) &&
-            !$this->container->get('security.authorization_checker')
+            !$this->authChecker->get('security.authorization_checker')
                     ->isGranted($report_config['role'])) {
             throw new \Exception("No will do");
         }
 
-        $report_class = new $report_config['class']($this->container);
+        $report_class = new $report_config['class']($this->entityManager);
         $config = array_merge($report_config, $config);
 
         // Run the report:
@@ -141,26 +152,13 @@ class Reports
         // First, pick the objects.
         $picker = $config['pickers'];
         $picker_config = $this->picker_list[$picker];
-        $report_class = new $picker_config['class']($this->container);
+        $report_class = new $picker_config['class']($this->entityManager);
 
         // Run the picker:
         $data = $report_class->$picker($config);
 
-        // Run the filter: (Coming later)
-
-        // Serialize everything;
-        $serializer = $this->container->get('jms_serializer');
-        // $encoders = array();
-        // $normalizers = array(new GetSetMethodNormalizer());
-        // $serializer = new Serializer($normalizers, $encoders);
-        // $serializer->normalize($data);
-
-        // Output it all? CSV to file or just return the stuff to 
-        // the controller if web.
-
         if ($config['output_method'] == "web") {
-            return $serializer->serialize($data, 'json');
-            return $data;
+            return $this->serializer->serialize($data, 'json');
         }
     }
 

@@ -6,12 +6,12 @@ class CommonReportFunctions
 {
     public function getManager()
     {
-        return $this->container->get('doctrine')->getManager();
+        return $this->entityManager;
     } 
 
     public function getRouter()
     {
-        return $this->container->get('router');
+        return $this->router;
     }
 
     public function createUrlFor($path, $values)

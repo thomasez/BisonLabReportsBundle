@@ -2,12 +2,15 @@
 
 namespace BisonLab\ReportsBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+
+use BisonLab\ReportsBundle\Service\Reports;
 
 /**
  * Generic but not that generic report command. Yet.
@@ -18,9 +21,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
  */
 
+#[AsCommand(
+    name: 'bisonlab:report',
+    description: 'The console command for running reports',
+)]
 class BisonLabReportsCommand extends Command
 {
-    protected static $defaultName = 'bisonlab:report';
     private $verbose = true;
     private $reports;
 
@@ -39,7 +45,7 @@ EOT
             );
     }
 
-    public function __construct($reports)
+    public function __construct(Reports $reports)
     { 
         $this->reports = $reports;
         parent::__construct();
@@ -69,13 +75,13 @@ EOT
             foreach($this->reports->getReports() as $name => $config) {
                 $output->writeln($name . "\t\t" . $config['description']);
             }
-            return 1;
+            return Command::SUCCESS;
         }
 
         if (!$this->filename)
         {
-           $output->writeln("I do need a filename");
-           return 1;
+            $output->writeln("I do need a filename");
+            return Command::FAILURE;
         }
     
         // Ok, prepare the config:
@@ -87,6 +93,6 @@ EOT
             'store_server' => true
         );
         $reports->runFixedReport($config);
-        return 1;
+        return Command::SUCCESS;
     }
 }

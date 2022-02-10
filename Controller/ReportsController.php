@@ -7,11 +7,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+
+use BisonLab\ReportsBundle\Service\Reports;
 
 /**
  * User controller.
@@ -22,8 +25,20 @@ class ReportsController extends AbstractController
 {
     private $reports;
     private $translator;
+    protected $formFactory;
+    protected $parameterBag;
 
-    public function __construct($reports, $translator)
+    public function setFormFactory($formFactory)
+    {
+       $this->formFactory = $formFactory;
+    }
+
+    public function setParameterBag($parameterBag)
+    {
+       $this->parameterBag = $parameterBag;
+    }
+
+    public function __construct(Reports $reports, TranslatorInterface $translator)
     { 
         $this->reports = $reports;
         $this->translator = $translator;
