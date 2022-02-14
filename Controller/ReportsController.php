@@ -25,18 +25,6 @@ class ReportsController extends AbstractController
 {
     private $reports;
     private $translator;
-    protected $formFactory;
-    protected $parameterBag;
-
-    public function setFormFactory($formFactory)
-    {
-       $this->formFactory = $formFactory;
-    }
-
-    public function setParameterBag($parameterBag)
-    {
-       $this->parameterBag = $parameterBag;
-    }
 
     public function __construct(Reports $reports, TranslatorInterface $translator)
     { 
