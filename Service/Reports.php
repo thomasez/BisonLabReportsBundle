@@ -103,12 +103,15 @@ class Reports
             case 'web':
                 return $report_result;
                 break;
+/*
             case 'csv':
                 return isset($config['store_server']) ? 
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsCsv($config, $report_result);
                 break;
-            case 'xcsv':
+Gotta stream it:
+ */
+            case 'csv':
                 return isset($config['store_server']) ? 
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsXCsv($config, $report_result);
