@@ -326,10 +326,12 @@ Gotta stream it:
 
     public function sendAsXCsv($config, $report_result)
     {
-        $filename = $config['filename'] . ".csv" ?: "report.csv";
+        $filename  = $config['filename'] . ".csv" ?: "report.csv";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Csv');
+        if ($delimiter = $config['delimiter'] ?? null)
+            $writer->setDelimiter($delimiter);
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
