@@ -3,6 +3,7 @@
 namespace BisonLab\ReportsBundle\Service;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -14,40 +15,38 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class Reports 
 {
-    private $report_classes = array();
     private $picker_list = array();
-    private $report_list = array();
+    private $report_services = array();
+    private $forms_services = array();
     private $default_filestore = null;
-    private $entityManager = null;
-    private $authChecker = null;
-    private $serializer = null;
-    private $router = null;
 
-    public function __construct(ParameterBagInterface $pbag, EntityManagerInterface $entityManager, AuthorizationCheckerInterface $authChecker, SerializerInterface $serializer, RouterInterface $router)
-    {
-        $this->entityManager = $entityManager;
-        $this->authChecker = $authChecker;
-        $this->serializer = $serializer;
-        $this->router = $router;
-
+    public function __construct(
+        private ServiceLocator $locator,
+        private ParameterBagInterface $pbag,
+        private EntityManagerInterface $entityManager,
+        private AuthorizationCheckerInterface $authChecker,
+        private SerializerInterface $serializer,
+        private RouterInterface $router
+    ) {
         $config = $pbag->get('bisonlab_reports');
         $this->default_filestore = $config['default_filestore'] ?? null;
-        $report_classes = $config['report_classes'] ?? [];
 
-        foreach ($report_classes as $class) {
-            $rep_obj = new $class($this->entityManager, array());
+        foreach ($this->locator->getProvidedServices() as $rclass) {
+            $rep_obj = $this->locator->get($rclass);
 
-            $this->report_classes[] = $rep_obj;
-            $pickers = $rep_obj->getPickerFunctions();
-            foreach ($pickers as $p => $config) {
-                if (!isset($config['class']))  $config['class'] = $class;
-                $this->picker_list[$p] = $config;
+            if (method_exists($rep_obj, 'addCriteriasToForm')) {
+                $this->forms_services[] = $rep_obj;
             }
 
-            $reports = $rep_obj->getReports();
-            foreach ($reports as $r => $config) {
-                if (!isset($config['class']))  $config['class'] = $class;
-                $this->report_list[$r] = $config;
+            if (method_exists($rep_obj, 'getPickerFunctions')) {
+                foreach ($rep_obj->getPickerFunctions() as $p => $config) {
+                    // Somehow I have to add the service handling this?
+                    $this->picker_list[$p] = $config;
+                }
+            }
+
+            if (method_exists($rep_obj, 'getDescription')) {
+                $this->report_services[$rclass] = $rep_obj;
             }
         }
     }
@@ -58,21 +57,18 @@ class Reports
     public function getReports($all = false)
     {
         if ($all)
-            return $this->report_list;
+            return $this->report_services;
         $reports = array();
-        foreach ($this->report_list as $n => $r) {
-            if (isset($r['role'])) {
-                if ($this->authChecker->get('security.authorization_checker')
-                        ->isGranted($r['role'])) {
-                    $reports[$n] = $r;
-                }
-            } else {
+        foreach ($this->report_services as $n => $r) {
+            if ($r->allowRunReport())
                 $reports[$n] = $r;
-            }
         }
         return $reports;
     }
 
+    /*
+     * This has been an idea and not more than work in progress for years.
+     */
     public function getPickers()
     {
         return $this->picker_list;
@@ -82,21 +78,16 @@ class Reports
     {
         // First, pick the objects.
         $report = $config['report'];
-        if (!isset($this->report_list[$report])) {
-            throw new InvalidArgumentException('There are no such report');
-        }
-        $report_config = $this->report_list[$report];
-        if (isset($report_config['role']) &&
-            !$this->authChecker->get('security.authorization_checker')
-                    ->isGranted($report_config['role'])) {
-            throw new \Exception("No will do");
+        if (!isset($this->report_services[$report])) {
+            throw new \InvalidArgumentException('There are no such report');
         }
 
-        $report_class = new $report_config['class']($this->entityManager);
-        $config = array_merge($report_config, $config);
+        $report_service = $this->report_services[$report];
+        if (!$report_service->allowRunReport())
+            throw new \Exception("No will do");
 
         // Run the report:
-        $report_result = $report_class->runFixedReport($config);
+        $report_result = $report_service->runFixedReport($config);
 
         // Run the filter: (Coming later)
         if (isset($config['store_server'])) {
@@ -147,15 +138,17 @@ class Reports
         }
     }
 
+    /*
+     * Not in use, seems like a good idea, but not finished.
+     */
     public function runCompiledReport($config)
     {
         // First, pick the objects.
         $picker = $config['pickers'];
-        $picker_config = $this->picker_list[$picker];
-        $report_class = new $picker_config['class']($this->entityManager);
+        $picker_servcice = $this->picker_list[$picker];
 
         // Run the picker:
-        $data = $report_class->$picker($config);
+        $data = $picker_servcice->$picker($config);
 
         if ($config['output_method'] == "web") {
             return $this->serializer->serialize($data, 'json');
@@ -184,8 +177,8 @@ class Reports
 
     public function addCriteriasToForm(&$form)
     {
-        foreach ($this->report_classes as $class) {
-            $class->addCriteriasToForm($form);
+        foreach ($this->forms_services as $service) {
+            $service->addCriteriasToForm($form);
         }
     }
 

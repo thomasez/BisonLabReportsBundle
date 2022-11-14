@@ -138,7 +138,7 @@ class ReportsController extends AbstractController
         $choices = array();
         $required = array();
         foreach ($reports as $r => $c) {
-            $choices[$c['description']] = $r;
+            $choices[$c->getDescription()] = $r;
         }
 
         $report_form_builder = $this->createFormBuilder()

@@ -9,6 +9,11 @@ services:
             - '../DependencyInjection/'
             - '../Lib/'
 
+    BisonLab\ReportsBundle\Service\Reports:
+        arguments: [!tagged_locator { tag: 'bisonlab.reports', index_by: 'key' }]
+        autowire: true
+        autoconfigure: true
+
 #    BisonLab\ReportsBundle\Command\:
 #        resource: '../Command/*'
 #        tags: ['console.command']
