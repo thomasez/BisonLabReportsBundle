@@ -17,10 +17,9 @@ use BisonLab\ReportsBundle\Service\Reports;
  *
  * @author    Thomas Lundquist <thomasez@bisonlab.no>
  * @copyright 2010, 2011, 2012 Repill-Linpro
- * @copyright 2015, 2016, 2017, 2018, 2019, 2020 BisonLab AS
+ * @copyright 2015 - 2023, BisonLab AS
  * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
  */
-
 #[AsCommand(
     name: 'bisonlab:report',
     description: 'The console command for running reports',
@@ -28,7 +27,6 @@ use BisonLab\ReportsBundle\Service\Reports;
 class BisonLabReportsCommand extends Command
 {
     private $verbose = true;
-    private $reports;
 
     protected function configure()
     {
@@ -45,9 +43,9 @@ EOT
             );
     }
 
-    public function __construct(Reports $reports)
-    { 
-        $this->reports = $reports;
+    public function __construct(
+        private Reports $reports
+    ) {
         parent::__construct();
     }
 
@@ -72,8 +70,8 @@ EOT
 
         if ($this->list)
         {
-            foreach($this->reports->getReports() as $name => $config) {
-                $output->writeln($name . "\t\t" . $config['description']);
+            foreach($this->reports->getReports() as $name => $rservice) {
+                $output->writeln($name . "\t\t" . $rservice->getDescription());
             }
             return Command::SUCCESS;
         }
@@ -92,7 +90,8 @@ EOT
             'output_method' => $this->output_method,
             'store_server' => true
         );
-        $reports->runFixedReport($config);
+        $this->reports->runFixedReport($config);
+        $output->writeln("Success, report written to " . $config['filename']);
         return Command::SUCCESS;
     }
 }

@@ -63,7 +63,7 @@ class ReportsController extends AbstractController
      */
     public function runFixedAction(Request $request, $access)
     {
-        $config = $request->request->get('form');
+        $config = $request->request->all('form');
         $report_result = $this->reports->runFixedReport($config);
 
         // All is just done and finished.
@@ -107,7 +107,7 @@ class ReportsController extends AbstractController
      */
     public function runCompiledAction(Request $request, $access)
     {
-        $config = $request->request->get('form');
+        $config = $request->request->all('form');
 
         $report_result = $this->reports->runCompiledReport($config);
         if (!isset($data['header']) || !$header = $data['header']) {
