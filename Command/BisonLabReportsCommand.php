@@ -2,6 +2,7 @@
 
 namespace BisonLab\ReportsBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,22 +10,25 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+use BisonLab\ReportsBundle\Service\Reports;
+
 /**
  * Generic but not that generic report command. Yet.
  *
  * @author    Thomas Lundquist <thomasez@bisonlab.no>
  * @copyright 2010, 2011, 2012 Repill-Linpro
- * @copyright 2015, 2016, 2017, 2018, 2019, 2020 BisonLab AS
+ * @copyright 2015 - 2023, BisonLab AS
  * @license   http://www.gnu.org/copyleft/lesser.html  LGPL License 2.1
  */
-
+#[AsCommand(
+    name: 'bisonlab:report',
+    description: 'The console command for running reports',
+)]
 class BisonLabReportsCommand extends Command
 {
-    protected static $defaultName = 'bisonlab:report';
     private $verbose = true;
-    private $reports;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Reports')
@@ -39,13 +43,13 @@ EOT
             );
     }
 
-    public function __construct($reports)
-    { 
-        $this->reports = $reports;
+    public function __construct(
+        private Reports $reports
+    ) {
         parent::__construct();
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         parent::initialize($input, $output);
 
@@ -66,16 +70,16 @@ EOT
 
         if ($this->list)
         {
-            foreach($this->reports->getReports() as $name => $config) {
-                $output->writeln($name . "\t\t" . $config['description']);
+            foreach($this->reports->getReports() as $name => $rservice) {
+                $output->writeln($name . "\t\t" . $rservice->getDescription());
             }
-            return 1;
+            return Command::SUCCESS;
         }
 
         if (!$this->filename)
         {
-           $output->writeln("I do need a filename");
-           return 1;
+            $output->writeln("I do need a filename");
+            return Command::FAILURE;
         }
     
         // Ok, prepare the config:
@@ -86,7 +90,8 @@ EOT
             'output_method' => $this->output_method,
             'store_server' => true
         );
-        $reports->runFixedReport($config);
-        return 1;
+        $this->reports->runFixedReport($config);
+        $output->writeln("Success, report written to " . $config['filename']);
+        return Command::SUCCESS;
     }
 }

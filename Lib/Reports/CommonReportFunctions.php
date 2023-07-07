@@ -2,16 +2,16 @@
 
 namespace BisonLab\ReportsBundle\Lib\Reports;
 
-class CommonReportFunctions
+trait CommonReportFunctions
 {
-    public function getManager()
+    public function getRequiredOptions(): array
     {
-        return $this->container->get('doctrine')->getManager();
-    } 
+        return [''];
+    }
 
-    public function getRouter()
+    public function allowRunReport(): bool
     {
-        return $this->container->get('router');
+        return true;
     }
 
     public function createUrlFor($path, $values)
@@ -20,8 +20,7 @@ class CommonReportFunctions
             $values = array('id' => $values);
         }
 
-        $router = $this->getRouter();
-        $route = $router->generate($path, $values);
+        $route = $this->router->generate($path, $values);
         $url = '<A HREF="' . $route . '">' . array_values($values)[0] . '</a>';
     
         return $url;

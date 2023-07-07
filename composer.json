@@ -13,7 +13,7 @@
     ],
     "require": {
         "phpoffice/phpspreadsheet": "^1.10",
-        "mpdf/mpdf": "^8.0",
+        "mpdf/mpdf": "^8.1",
         "symfony/framework-bundle": "^5.3|^6.0"
     },
     "autoload": {

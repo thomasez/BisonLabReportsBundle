@@ -2,41 +2,54 @@
 
 namespace BisonLab\ReportsBundle\Service;
 
-use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class Reports 
 {
-    private $report_classes = array();
     private $picker_list = array();
-    private $report_list = array();
+    private $report_services = array();
+    private $forms_services = array();
     private $default_filestore = null;
-    private $container = null;
 
-    public function __construct($container, $config = [])
-    {
-        $this->container         = $container;
+    public function __construct(
+        private ServiceLocator $locator,
+        private ParameterBagInterface $pbag,
+        private EntityManagerInterface $entityManager,
+        private AuthorizationCheckerInterface $authChecker,
+        private SerializerInterface $serializer,
+        private RouterInterface $router
+    ) {
+        $config = $pbag->get('bisonlab_reports');
         $this->default_filestore = $config['default_filestore'] ?? null;
-        $report_classes = $config['report_classes'] ?? [];
 
-        foreach ($report_classes as $class) {
-            $rep_obj = new $class($container, array());
+        foreach ($this->locator->getProvidedServices() as $rclass) {
+            $rep_obj = $this->locator->get($rclass);
+            // If not, "Notice: Only variables should be passed by reference"
+            $foo = explode('\\', $rclass);
+            $name = end($foo);
 
-            $this->report_classes[] = $rep_obj;
-            $pickers = $rep_obj->getPickerFunctions();
-            foreach ($pickers as $p => $config) {
-                if (!isset($config['class']))  $config['class'] = $class;
-                $this->picker_list[$p] = $config;
+            if (method_exists($rep_obj, 'addCriteriasToForm')) {
+                $this->forms_services[] = $rep_obj;
             }
 
-            $reports = $rep_obj->getReports();
-            foreach ($reports as $r => $config) {
-                if (!isset($config['class']))  $config['class'] = $class;
-                $this->report_list[$r] = $config;
+            if (method_exists($rep_obj, 'getPickerFunctions')) {
+                foreach ($rep_obj->getPickerFunctions() as $p => $config) {
+                    // Somehow I have to add the service handling this?
+                    $this->picker_list[$p] = $config;
+                }
+            }
+
+            if (method_exists($rep_obj, 'getDescription')) {
+                $this->report_services[$name] = $rep_obj;
             }
         }
     }
@@ -47,45 +60,38 @@ class Reports
     public function getReports($all = false)
     {
         if ($all)
-            return $this->report_list;
+            return $this->report_services;
         $reports = array();
-        foreach ($this->report_list as $n => $r) {
-            if (isset($r['role'])) {
-                if ($this->container->get('security.authorization_checker')
-                        ->isGranted($r['role'])) {
-                    $reports[$n] = $r;
-                }
-            } else {
+        foreach ($this->report_services as $n => $r) {
+            if ($r->allowRunReport())
                 $reports[$n] = $r;
-            }
         }
         return $reports;
     }
 
+    /*
+     * This has been an idea and not more than work in progress for years.
+     */
     public function getPickers()
     {
         return $this->picker_list;
     }
 
-    public function runFixedReport($config)
+    public function runFixedReport(&$config)
     {
         // First, pick the objects.
         $report = $config['report'];
-        if (!isset($this->report_list[$report])) {
-            throw new InvalidArgumentException('There are no such report');
-        }
-        $report_config = $this->report_list[$report];
-        if (isset($report_config['role']) &&
-            !$this->container->get('security.authorization_checker')
-                    ->isGranted($report_config['role'])) {
-            throw new \Exception("No will do");
+        if (!isset($this->report_services[$report])) {
+            throw new \InvalidArgumentException('There are no such report');
         }
 
-        $report_class = new $report_config['class']($this->container);
-        $config = array_merge($report_config, $config);
+        $report_service = $this->report_services[$report];
+        if (!$report_service->allowRunReport())
+            throw new \Exception("No will do");
 
         // Run the report:
-        $report_result = $report_class->runFixedReport($config);
+        $report_result = $report_service->runFixedReport($config);
+        $config['description'] = $report_service->getDescription();
 
         // Run the filter: (Coming later)
         if (isset($config['store_server'])) {
@@ -94,44 +100,42 @@ class Reports
                 $config['filename'] = "report_from_web";
         }
 
-        // Remove extensions. Will be re-added later.
-        if (empty($config['filename'] ?? null))
-            $config['filename'] = "generated_report";
-        $config['filename'] = preg_replace('/\.\w\w\w$/', '', $config['filename']);
-
         switch ($config['output_method']) {
             case 'web':
                 return $report_result;
                 break;
-/*
             case 'csv':
+                $this->_checkFilename($config, 'csv');
                 return isset($config['store_server']) ? 
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsCsv($config, $report_result);
                 break;
-Gotta stream it:
- */
-            case 'csv':
+            case 'xcsv':
+                $this->_checkFilename($config, 'csv');
                 return isset($config['store_server']) ? 
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsXCsv($config, $report_result);
                 break;
             case 'xls2007':
+                $this->_checkFilename($config, 'xlsx');
                 return isset($config['store_server']) ? 
                     $this->printToXls2007File($config, $report_result)
                     : $this->sendAsXls2007($config, $report_result);
                 break;
             case 'xls5':
+                $this->_checkFilename($config, 'xls');
                 return isset($config['store_server']) ? 
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsXls5($config, $report_result);
                 break;
             case 'ods':
+                $this->_checkFilename($config, 'ods');
                 return isset($config['store_server']) ? 
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsOds($config, $report_result);
                 break;
             case 'pdf':
+                $this->_checkFilename($config, 'pdf');
                 return isset($config['store_server']) ? 
                     $this->printToPdf($config, $report_result)
                     : $this->sendAsPdf($config, $report_result);
@@ -139,31 +143,20 @@ Gotta stream it:
         }
     }
 
+    /*
+     * Not in use, seems like a good idea, but not finished.
+     */
     public function runCompiledReport($config)
     {
         // First, pick the objects.
         $picker = $config['pickers'];
-        $picker_config = $this->picker_list[$picker];
-        $report_class = new $picker_config['class']($this->container);
+        $picker_servcice = $this->picker_list[$picker];
 
         // Run the picker:
-        $data = $report_class->$picker($config);
-
-        // Run the filter: (Coming later)
-
-        // Serialize everything;
-        $serializer = $this->container->get('jms_serializer');
-        // $encoders = array();
-        // $normalizers = array(new GetSetMethodNormalizer());
-        // $serializer = new Serializer($normalizers, $encoders);
-        // $serializer->normalize($data);
-
-        // Output it all? CSV to file or just return the stuff to 
-        // the controller if web.
+        $data = $picker_servcice->$picker($config);
 
         if ($config['output_method'] == "web") {
-            return $serializer->serialize($data, 'json');
-            return $data;
+            return $this->serializer->serialize($data, 'json');
         }
     }
 
@@ -189,16 +182,29 @@ Gotta stream it:
 
     public function addCriteriasToForm(&$form)
     {
-        foreach ($this->report_classes as $class) {
-            $class->addCriteriasToForm($form);
+        foreach ($this->forms_services as $service) {
+            $service->addCriteriasToForm($form);
         }
     }
 
-    public function sendAsCsv($config, $report_result)
+    private function _checkFilename(&$config, $ext)
     {
-        $filename = $config['filename'] . ".csv" ?: "report.csv";
+        $config['filename'] ??= "report";
+        // Any path specified? write the file to it.
+        // No path, use the default filestore path.
+        if (strlen(dirname($config['filename'])) < 2)
+            $config['filename'] = $this->default_filestore
+                . "/" . $config['filename'];
+
+        // Any extension already specified?
+        if (!preg_match("/". $ext ."$/", $config['filename']))
+            $config['filename'] .= "." . $ext;
+    }
+
+    public function sendAsCsv(&$config, $report_result)
+    {
         header( 'Content-Type: text/csv' );
-        header( 'Content-Disposition: attachment;filename='.$filename);
+        header( 'Content-Disposition: attachment;filename='.$config['filename']);
 
         $output_file = fopen('php://output', 'w');
 
@@ -208,19 +214,13 @@ Gotta stream it:
         return true;
     }
 
-    public function printToCsvFile($config, $report_result)
+    public function printToCsvFile(&$config, $report_result)
     {
-        if (!isset($config['filename'])) 
-          throw new \RuntimeException("Can not write to a file with no name.");
-
-        if (strlen(dirname($config['filename']) < 2))
-            $config['filename'] = $this->default_filestore
-                . "/" . $config['filename'];
-
-        if (!$output_file = fopen($config['filename'] . ".csv", 'w')) {
+        if (!$output_file = fopen($config['filename'], 'w')) {
           throw new \RuntimeException("Could not open file " 
                 . $config['filename'] . " for writing");
         }
+
         $this->createCsv($output_file, $config, $report_result);
         fclose($output_file);
         return true;
@@ -241,92 +241,75 @@ Gotta stream it:
         }
     }
 
-    public function sendAsXls2007($config, $report_result)
+    public function sendAsXls2007(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".xlsx" ?: "report.xlsx";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
     }
 
-    public function printToXls2007File($config, $report_result)
+    public function printToXls2007File(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".xlsx" ?: "report.xlsx";
-        if (strlen(dirname($filename) < 2))
-            $filename = $this->default_filestore
-                . "/" . $filename;
-
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         return true;;
     }
 
-    public function sendAsXls5($config, $report_result)
+    public function sendAsXls5(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".xls" ?: "report.xls";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xls');
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
     }
 
-    public function printToXls5File($config, $report_result)
+    public function printToXls5File(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".xls" ?: "report.xls";
-        if (strlen(dirname($filename) < 2))
-            $filename = $this->default_filestore
-                . "/" . $filename;
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xls');
-        $writer->save($filename);
+        $writer->save($config['filename']);
 
         return true;;
     }
 
-    public function sendAsOds($config, $report_result)
+    public function sendAsOds(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".ods" ?: "report.ods";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Ods');
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet');
-        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
     }
 
-    public function printToOdsFile($config, $report_result)
+    public function printToOdsFile(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".ods" ?: "report.ods";
-        if (strlen(dirname($filename) < 2))
-            $filename = $this->default_filestore
-                . "/" . $filename;
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Ods');
-        $writer->save($filename);
+        $writer->save($config['filename']);
 
         return true;;
     }
 
-    public function sendAsXCsv($config, $report_result)
+    public function sendAsXCsv(&$config, $report_result)
     {
-        $filename  = $config['filename'] . ".csv" ?: "report.csv";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Csv');
@@ -335,39 +318,34 @@ Gotta stream it:
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
     }
 
-    public function sendAsPdf($config, $report_result)
+    public function sendAsPdf(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".pdf" ?: "report.pdf";
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
         $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
 
         $response = $this->_createStreamedResponse($writer);
         $response->headers->set('Content-Type', 'application/pdf; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment;filename=' . $filename);
+        $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
     }
 
-    public function printToPdfFile($config, $report_result)
+    public function printToPdfFile(&$config, $report_result)
     {
-        $filename = $config['filename'] . ".pdf" ?: "report.pdf";
-        if (strlen(dirname($filename) < 2))
-            $filename = $this->default_filestore
-                . "/" . $filename;
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
-        $writer->save($filename);
+        $writer->save($config['filename']);
 
         return true;;
     }
 
-    public function compilePhpSpreadsheet($config, $report_result)
+    public function compilePhpSpreadsheet(&$config, $report_result)
     {
         /*
          * Prepare and handle config options.

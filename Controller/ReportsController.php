@@ -7,11 +7,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+
+use BisonLab\ReportsBundle\Service\Reports;
 
 /**
  * User controller.
@@ -23,7 +26,7 @@ class ReportsController extends AbstractController
     private $reports;
     private $translator;
 
-    public function __construct($reports, $translator)
+    public function __construct(Reports $reports, TranslatorInterface $translator)
     { 
         $this->reports = $reports;
         $this->translator = $translator;
@@ -60,7 +63,7 @@ class ReportsController extends AbstractController
      */
     public function runFixedAction(Request $request, $access)
     {
-        $config = $request->request->get('form');
+        $config = $request->request->all('form');
         $report_result = $this->reports->runFixedReport($config);
 
         // All is just done and finished.
@@ -104,7 +107,7 @@ class ReportsController extends AbstractController
      */
     public function runCompiledAction(Request $request, $access)
     {
-        $config = $request->request->get('form');
+        $config = $request->request->all('form');
 
         $report_result = $this->reports->runCompiledReport($config);
         if (!isset($data['header']) || !$header = $data['header']) {
@@ -135,7 +138,7 @@ class ReportsController extends AbstractController
         $choices = array();
         $required = array();
         foreach ($reports as $r => $c) {
-            $choices[$c['description']] = $r;
+            $choices[$c->getDescription()] = $r;
         }
 
         $report_form_builder = $this->createFormBuilder()

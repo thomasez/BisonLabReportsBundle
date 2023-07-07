@@ -4,9 +4,11 @@ namespace BisonLab\ReportsBundle\Lib\Reports;
 
 interface ReportsInterface
 {
+    public function getDescription(): string;
 
-    public function getPickerFunctions();
+    public function getRequiredOptions(): array;
 
-    public function addCriteriasToForm(&$form);
+    public function allowRunReport(): bool;
 
+    public function runFixedReport($config = null);
 }
