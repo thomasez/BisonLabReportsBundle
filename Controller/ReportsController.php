@@ -18,9 +18,8 @@ use BisonLab\ReportsBundle\Service\Reports;
 
 /**
  * User controller.
- *
- * @Route("/{access}/bisonlab_reports", defaults={"access": "web"}, requirements={"access": "web|rest|ajax"})
  */
+#[Route(path: '/{access}/bisonlab_reports', defaults: ['access' => 'web'], requirements: ['access' => 'web|rest|ajax'])]
 class ReportsController extends AbstractController
 {
     private $reports;
@@ -34,8 +33,8 @@ class ReportsController extends AbstractController
 
     /**
      * Lists all available reports
-     * @Route("/", name="reports");
      */
+    #[Route(path: '/', name: 'reports')]
     public function indexAction($access)
     {
         $reports = $this->reports;
@@ -59,8 +58,8 @@ class ReportsController extends AbstractController
 
     /**
      * Run report
-     * @Route("/run", name="reports_run_fixed", methods={"POST"});
      */
+    #[Route(path: '/run', name: 'reports_run_fixed', methods: ['POST'])]
     public function runFixedAction(Request $request, $access)
     {
         $config = $request->request->all('form');
@@ -103,8 +102,8 @@ class ReportsController extends AbstractController
 
     /**
      * Not in use, old relic and seems to be a good plan somehow.
-     * @Route("/run_compiled", name="reports_run_compiled", methods={"POST"});
      */
+    #[Route(path: '/run_compiled', name: 'reports_run_compiled', methods: ['POST'])]
     public function runCompiledAction(Request $request, $access)
     {
         $config = $request->request->all('form');
