@@ -16,6 +16,9 @@ trait CommonReportFunctions
 
     public function createUrlFor($path, $values)
     {
+        if (!isset($this->router))
+            throw new \Exception("The report does not autwiree a router to create URLs with.");
+
         if (!is_array($values)) {
             $values = array('id' => $values);
         }
