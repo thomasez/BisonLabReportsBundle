@@ -216,6 +216,7 @@ class Reports
 
     public function printToCsvFile(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'csv');
         if (!$output_file = fopen($config['filename'], 'w')) {
           throw new \RuntimeException("Could not open file " 
                 . $config['filename'] . " for writing");
@@ -256,6 +257,7 @@ class Reports
 
     public function printToXls2007File(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'xlsx');
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -277,6 +279,7 @@ class Reports
 
     public function printToXls5File(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'xls');
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xls');
@@ -300,6 +303,7 @@ class Reports
 
     public function printToOdsFile(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'ods');
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Ods');
@@ -337,6 +341,7 @@ class Reports
 
     public function printToPdfFile(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'pdf');
         $spreadsheet = $this->compilePhpSpreadsheet($config, $report_result);
 
         $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
