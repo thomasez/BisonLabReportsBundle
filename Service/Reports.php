@@ -216,6 +216,7 @@ class Reports
 
     public function printToCsvFile(&$config, $report_result)
     {
+        $this->_checkFilename($config, 'csv');
         if (!$output_file = fopen($config['filename'], 'w')) {
           throw new \RuntimeException("Could not open file " 
                 . $config['filename'] . " for writing");
