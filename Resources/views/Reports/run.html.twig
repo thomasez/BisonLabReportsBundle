@@ -77,8 +77,10 @@ $(document).ready(function() {
         $(".dataTables_filter").hide();
         $(".dataTables_paginate").hide();
         $(".dataTables_length").hide();
+        $(".hide_column").hide();
         window.print();
         document.body.style.paddingTop = "";
+        $(".hide_column").show();
         $(".dataTables_length").show();
         $(".dataTables_paginate").show();
         $(".dataTables_filter").show();
@@ -109,8 +111,14 @@ $(document).ready(function() {
     <thead>
     <tr>
       {% set hcount = header | length %}
+      {% set href_path_column = null %}
       {% for elem in header %}
-        <th class="bisrep_{{ loop.index }}">{{ elem }}</th>
+        {% if elem == "href_path" %}
+            <th class="hide_column bisrep_{{ loop.index }}">Go To</th>
+            {% set href_path_column = loop.index %}
+        {% else %}
+            <th class="bisrep_{{ loop.index }}">{{ elem }}</th>
+        {% endif %}
       {% endfor %}
     </tr>
     </thead>
@@ -121,7 +129,11 @@ $(document).ready(function() {
             {% set rest = hcount - rcount %}
             {% for col in row %}
                 {% if col is not empty %}
+                    {% if href_path_column and loop.index == href_path_column %}
+                        <td class="hide_column bisrep_{{ loop.index }}"><a href="{{ col | raw }}">Go to</a></td>
+                    {% else %}
                         <td class="bisrep_{{ loop.index }}">{{ col | raw }}</td>
+                    {% endif %}
                 {% else %}
                         <td class="bisrep_{{ loop.index }}">&nbsp;</td>
                 {% endif %}
