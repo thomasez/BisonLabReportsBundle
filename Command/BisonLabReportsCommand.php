@@ -56,9 +56,9 @@ EOT
         $this->verbose    = $input->getOption('verbose') ? true : false;
         $this->list       = $input->getOption('list') ? true : false;
         $this->filename   = $input->getOption('filename');
-        $this->delimiter  = $input->getOption('delimiter') ? $input->getOption('delimiter') : ';';
-        $this->report     = $input->getOption('report') ? $input->getOption('report') : '';
-        $this->output_method = $input->getOption('output-method') ? $input->getOption('output_method') : 'csv';
+        $this->delimiter  = $input->getOption('delimiter') ?: ';';
+        $this->report     = $input->getOption('report') ?: '';
+        $this->output_method = $input->getOption('output-method') ?: 'csv';
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

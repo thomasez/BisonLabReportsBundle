@@ -106,37 +106,43 @@ class Reports
                 break;
             case 'csv':
                 $this->_checkFilename($config, 'csv');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsCsv($config, $report_result);
                 break;
             case 'xcsv':
                 $this->_checkFilename($config, 'csv');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToCsvFile($config, $report_result)
                     : $this->sendAsXCsv($config, $report_result);
                 break;
+            case 'json':
+                $this->_checkFilename($config, 'json');
+                return isset($config['store_server']) ?
+                    $this->printToJsonFile($config, $report_result)
+                    : $this->sendAsJson($config, $report_result);
+                break;
             case 'xls2007':
                 $this->_checkFilename($config, 'xlsx');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToXls2007File($config, $report_result)
                     : $this->sendAsXls2007($config, $report_result);
                 break;
             case 'xls5':
                 $this->_checkFilename($config, 'xls');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsXls5($config, $report_result);
                 break;
             case 'ods':
                 $this->_checkFilename($config, 'ods');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToXls5File($config, $report_result)
                     : $this->sendAsOds($config, $report_result);
                 break;
             case 'pdf':
                 $this->_checkFilename($config, 'pdf');
-                return isset($config['store_server']) ? 
+                return isset($config['store_server']) ?
                     $this->printToPdf($config, $report_result)
                     : $this->sendAsPdf($config, $report_result);
                 break;
@@ -218,7 +224,7 @@ class Reports
     {
         $this->_checkFilename($config, 'csv');
         if (!$output_file = fopen($config['filename'], 'w')) {
-          throw new \RuntimeException("Could not open file " 
+          throw new \RuntimeException("Could not open file "
                 . $config['filename'] . " for writing");
         }
 
@@ -325,6 +331,43 @@ class Reports
         $response->headers->set('Content-Disposition', 'attachment;filename=' . $config['filename']);
 
         return $response;
+    }
+
+    public function sendAsJson(&$config, $report_result)
+    {
+        header( 'Content-Type: application/json' );
+        header( 'Content-Disposition: attachment;filename='.$config['filename']);
+        $output_file = fopen('php://output', 'w');
+        $this->createJson($output_file, $config, $report_result);
+        fclose($output_file);
+        return true;
+    }
+
+    public function printToJsonFile(&$config, $report_result)
+    {
+        $this->_checkFilename($config, 'json');
+        if (!$output_file = fopen($config['filename'], 'w')) {
+          throw new \RuntimeException("Could not open file "
+                . $config['filename'] . " for writing");
+        }
+
+        $this->createJson($output_file, $config, $report_result);
+        fclose($output_file);
+        return true;
+    }
+
+    public function createJson(&$output_file, $config, $report_result)
+    {
+        $delimiter = $config['delimiter'] ?? ",";
+
+        if (!isset($report_result['header']) || !$header = $report_result['header']) {
+            $header = array_keys($report_result['data'][0]);
+        }
+
+        foreach ($report_result['data'] as $line) {
+            $json = $this->serializer->serialize($line, 'json') . "\n";
+            fputs($output_file, $json);
+        }
     }
 
     public function sendAsPdf(&$config, $report_result)
