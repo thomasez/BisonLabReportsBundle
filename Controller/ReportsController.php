@@ -41,10 +41,25 @@ class ReportsController extends AbstractController
 
         $report_form_builder = $this->createReportFormBuilder($reports->getReports());
         $reports->addCriteriasToForm($report_form_builder);
+        // Gotta add criterias filtering.
+        $criterias_config = [];
+        foreach ($reports->getReports() as $name => $report) {
+            // No criterias to add, do not bother.
+            if (method_exists($report, 'getCriterias')) {
+                foreach ($report->getCriterias() as $c) {
+                    // I am sure there is a shorthand for this.
+                    if (!isset($criterias_config[$c]))
+                        $criterias_config[$c] = [];
+                    $criterias_config[$c][] = $name;
+                }
+            }
+        }
+
         $reports->addOutputChoicesToForm($report_form_builder);
 
         return $this->render('@BisonLabReports/Reports/index.html.twig',
             array(
+            'criterias_config' => $criterias_config,
             'report_form' => $report_form_builder->getForm()->createView(),
         ));
     }
