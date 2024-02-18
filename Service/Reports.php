@@ -15,7 +15,6 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class Reports 
 {
-    private $picker_list = array();
     private $report_services = array();
     private $forms_services = array();
     private $default_filestore = null;
@@ -41,13 +40,6 @@ class Reports
                 $this->forms_services[] = $rep_obj;
             }
 
-            if (method_exists($rep_obj, 'getPickerFunctions')) {
-                foreach ($rep_obj->getPickerFunctions() as $p => $config) {
-                    // Somehow I have to add the service handling this?
-                    $this->picker_list[$p] = $config;
-                }
-            }
-
             if (method_exists($rep_obj, 'getDescription')) {
                 $this->report_services[$name] = $rep_obj;
             }
@@ -69,17 +61,8 @@ class Reports
         return $reports;
     }
 
-    /*
-     * This has been an idea and not more than work in progress for years.
-     */
-    public function getPickers()
-    {
-        return $this->picker_list;
-    }
-
     public function runFixedReport(&$config)
     {
-        // First, pick the objects.
         $report = $config['report'];
         if (!isset($this->report_services[$report])) {
             throw new \InvalidArgumentException('There are no such report');
@@ -94,6 +77,8 @@ class Reports
         $config['description'] = $report_service->getDescription();
 
         // Run the filter: (Coming later)
+
+        // Store data, if chosen.
         if (isset($config['store_server'])) {
             // No filename, nothing to do?
             if (!isset($config['filename']))
@@ -146,23 +131,6 @@ class Reports
                     $this->printToPdf($config, $report_result)
                     : $this->sendAsPdf($config, $report_result);
                 break;
-        }
-    }
-
-    /*
-     * Not in use, seems like a good idea, but not finished.
-     */
-    public function runCompiledReport($config)
-    {
-        // First, pick the objects.
-        $picker = $config['pickers'];
-        $picker_servcice = $this->picker_list[$picker];
-
-        // Run the picker:
-        $data = $picker_servcice->$picker($config);
-
-        if ($config['output_method'] == "web") {
-            return $this->serializer->serialize($data, 'json');
         }
     }
 

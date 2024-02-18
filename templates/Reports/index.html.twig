@@ -23,23 +23,4 @@
 
     <button type="submit">{{'bisonlab_reports.run'|trans({}, 'bisonlab_reports')}}</button>
 </form>
-
-{#
-<h2>Compile your own:</h2>
-
-<form action="{{ path('reports_run_compiled') }}" method="post">
-    <ul>
-        <li><strong>Pickers:</strong> {{ form_widget(picker_form.pickers) }}
-        <br />
-        <li><strong>Filters:</strong> 
-        <br />
-        <li><strong>Output as:</strong> {{ form_widget(picker_form.output_method) }}
-        <br />
-        <li><strong>Criterias:</strong> {{ form_rest(picker_form) }}
-    </ul>
-
-    <button type="submit">Run</button>
-</form>
-#}
-
 {% endblock %}

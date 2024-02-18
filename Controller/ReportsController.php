@@ -39,19 +39,12 @@ class ReportsController extends AbstractController
     {
         $reports = $this->reports;
 
-        // $reports = $reports->getReports();
-        $picker_form_builder = $this->createPickerFormBuilder($reports->getPickers());
-        // $picker_form_builder = $reports->addCriteriasToForm($picker_form_builder);
-        $reports->addCriteriasToForm($picker_form_builder);
-        $reports->addOutputChoicesToForm($picker_form_builder);
-
         $report_form_builder = $this->createReportFormBuilder($reports->getReports());
         $reports->addCriteriasToForm($report_form_builder);
         $reports->addOutputChoicesToForm($report_form_builder);
 
         return $this->render('@BisonLabReports/Reports/index.html.twig',
             array(
-            'picker_form' => $picker_form_builder->getForm()->createView(),
             'report_form' => $report_form_builder->getForm()->createView(),
         ));
     }
@@ -114,22 +107,6 @@ class ReportsController extends AbstractController
         }
         return $this->render('@BisonLabReports/Reports/run.html.twig',
             $report_result);
-    }
-
-    private function createPickerFormBuilder($pickers)
-    {
-        $choices = array();
-        $required = array();
-        foreach ($pickers as $p => $c) {
-            $choices[$c['description']] = $p;
-        }
-
-        $picker_form_builder = $this->createFormBuilder()
-            ->add('pickers', ChoiceType::class, array(
-                'choices' => $choices,
-                ));
-
-        return $picker_form_builder;
     }
 
     private function createReportFormBuilder($reports)
