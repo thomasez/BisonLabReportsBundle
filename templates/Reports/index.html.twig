@@ -34,6 +34,9 @@
 <script>
     $(document).ready(function() {
             $( ".report_criteria").hide();
+            if (form_report_value = $("#form_report")[0].value) {
+                $( "." + form_report_value).show();
+            }
     });
 
     function filterCriterias(picked) {
