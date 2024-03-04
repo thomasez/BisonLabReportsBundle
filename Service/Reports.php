@@ -147,7 +147,6 @@ class Reports
                 'XLS 2007'              => 'xls2007',
                 'XLS 5'                 => 'xls5',
                 'PDF'                   => 'pdf',
-                'CSV to server storage' => 'store_csv',
         ];
         $form->add('output_method', ChoiceType::class, array(
             'choices' => $choices,
