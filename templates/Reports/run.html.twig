@@ -17,111 +17,24 @@ This is the css/js files used here. Or rather than just copy this into your scri
 
 {% block content %}
 
-<script>
-
-function checkChecked(index)
-{
-    if ($( "#check_" + index ).is(":checked")) {
-        $( ".bisrep_" + index ).show();
-    } else {
-        $( ".bisrep_" + index ).hide();
-    }
-}
-
-function printDataInNewPage()
-{
-   var divToPrint=document.getElementById("reports_table");
-   newWin= window.open("");
-   newWin.document.write(divToPrint.outerHTML);
-   newWin.print();
-   newWin.close();
-}
-
-$(document).ready(function() {
-
-    $('#printbutton').on('click',function(){
-        /* This does not take style into consideration, and if we hide table
-         * columns it will print those aswell.
-         */
-        // printDataInNewPage();
-        /*
-         * If we hide most of the page, print and then show again, we have a nice
-         * printout. But the issue is that we do  not know what to hide, since this
-         * is a generic bundle.
-         * Pretty sure it's possible to traverse backwards from the table itself,
-         * but must be some work.
-         * And after that, go back through and show again.
-         */
-
-        /*
-         * The hack'y, but reasonable option is to just hide the header.
-         * But hiding will not release the space taken up by the header and then
-         * it'll look stupid. Gotta handle that aswell.
-         * The Print button and eventual datatables buttons has to be hidden aswell.
-         */
-        if ($('#reports_table >tbody >tr').length > 200) {
-            $('#reports_table').dataTable({
-                "destroy": true,
-                "paging": false,
-                "order": []
-                });
-        }
-        $("header").hide();
-        // This may be a bit specific for my designs,
-        document.body.style.paddingTop = "0px";
-        $("h1").hide();
-        $("button").hide();
-        $("label").hide();
-        $("input").hide();
-        $(".dataTables_info").hide();
-        $(".dataTables_filter").hide();
-        $(".dataTables_paginate").hide();
-        $(".dataTables_length").hide();
-        $(".hide_column").hide();
-        window.print();
-        document.body.style.paddingTop = "";
-        $(".hide_column").show();
-        $(".dataTables_length").show();
-        $(".dataTables_paginate").show();
-        $(".dataTables_filter").show();
-        $(".dataTables_info").show();
-        $("h1").show();
-        $("input").show();
-        $("label").show();
-        $("header").show();
-        $("button").show();
-    })
-
-})
-</script>
-
 <h1><strong> {{ report.description }} </strong> </h1>
 
-{# Maybe datatables does this better?
-  (The answer is more or less guaranteed to be "Yes". Keeping the code forr  a revsion or two anyway.)
-
-{% for elem in header %}
-<input id="check_{{ loop.index }}" type="checkbox" onClick='checkChecked("{{ loop.index }}");' checked>{{ elem }}</input>
-{% endfor %}
-<br>
-<button id="printbutton">Print me</button>
-
-#}
 <table class="record_properties table-striped display compact" id="reports_table" style="width:100%">
     <thead>
     <tr>
       {% set hcount = header | length %}
-      {% set href_path_column = null %}
       {% for elem in header %}
-        {% if elem == "href_path" %}
-            <th class="hide_column bisrep_{{ loop.index }}">Go To</th>
-            {% set href_path_column = loop.index %}
-        {% else %}
-            <th class="bisrep_{{ loop.index }}">{{ elem }}</th>
-        {% endif %}
+        <th>{{ elem }}</th>
       {% endfor %}
     </tr>
     </thead>
+    <tfoot>
+    <tr>
+      {% for elem in header %}
+        <th>{{ elem }}</th>
+      {% endfor %}
+    </tr>
+    </tfoot>
     <tbody>
       {% for row in data %}
         <tr>
@@ -129,18 +42,14 @@ $(document).ready(function() {
             {% set rest = hcount - rcount %}
             {% for col in row %}
                 {% if col is not empty %}
-                    {% if href_path_column and loop.index == href_path_column %}
-                        <td class="hide_column bisrep_{{ loop.index }}"><a href="{{ col | raw }}">Go to</a></td>
-                    {% else %}
-                        <td class="bisrep_{{ loop.index }}">{{ col | raw }}</td>
-                    {% endif %}
+                    <td>{{ col | raw }}</td>
                 {% else %}
-                        <td class="bisrep_{{ loop.index }}">&nbsp;</td>
+                    <td>&nbsp;</td>
                 {% endif %}
            {% endfor %}
            {% if rest > 0 %}
                {% for r in 1..rest %}
-                    <td class="bisrep_{{ rcount - r }}">&nbsp;</td>
+                    <td>&nbsp;</td>
                {% endfor %}
            {% endif %}
         </tr>
@@ -149,78 +58,137 @@ $(document).ready(function() {
 </table>
 
 <script type="text/javascript">
-$(document).ready(function()
-    {
-        if ($('#reports_table >tbody >tr').length > 200) {
-            $('#reports_table').dataTable({
-                order: [],
-                pageLength: 200,
-                lengthMenu: [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]],
-                searching: true,
-                dom: 'Bfrtip',
-                buttons: [ 
-                    {
-                        "extend": 'copy',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'excel',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'csv',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'pdf',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    'colvis'
-                ]
-            });
-        } else {
-            $('#reports_table').dataTable({
-                paging: false,
-                order: [],
-                dom: 'Bfrtip',
-                buttons: [ 
-                    {
-                        "extend": 'copy',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'excel',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'csv',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    {
-                        "extend": 'pdf',
-                        "exportOptions": {
-                            "columns": ':visible'
-                        }
-                    },
-                    'colvis'
-                ]
-            });
+$(document).ready(function() {
+
+    $('#reports_table').find('tfoot').find('th').each( function () {
+        if ($(this).hasClass('no-search') || $(this).hasClass('no-sort')) {
+            return;
         }
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search" size="15"/>' );
+    });
+
+    if ($('#reports_table >tbody >tr').length > 200) {
+        $('#reports_table').dataTable({
+            order: [],
+            pageLength: 200,
+            lengthMenu: [[ 50, 100, 200, 500 -1], [50, 100, 200, 500, "All"]],
+            searching: true,
+            dom: 'Bfrtip',
+            buttons: [ 
+                {
+                    "extend": 'print',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'copy',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'excel',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'csv',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'pdf',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                'colvis'
+            ],
+            initComplete: function () {
+                var r = $('#reports_table').find('tfoot').find('tr');
+                r.find('th').each(function(){
+                    $(this).css('padding', 8);
+                });
+                $('#reports_table').find('thead').append(r);
+                $('#search_0').css('text-align', 'center');
+
+                this.api().columns().every(function () {
+                    var that = this;
+
+                    $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that
+                                .search(this.value)
+                                .draw();
+                        }
+                    });
+                });
+            }
+        });
+    } else {
+        $('#reports_table').dataTable({
+            paging: false,
+            order: [],
+            dom: 'Bfrtip',
+            buttons: [ 
+                {
+                    "extend": 'print',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'copy',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'excel',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'csv',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                {
+                    "extend": 'pdf',
+                    "exportOptions": {
+                        "columns": ':visible'
+                    }
+                },
+                'colvis'
+            ],
+            initComplete: function () {
+                var r = $('#reports_table').find('tfoot').find('tr');
+                r.find('th').each(function(){
+                    $(this).css('padding', 8);
+                });
+                $('#reports_table').find('thead').append(r);
+                $('#search_0').css('text-align', 'center');
+
+                this.api().columns().every(function () {
+                    var that = this;
+
+                    $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that
+                                .search(this.value)
+                                .draw();
+                        }
+                    });
+                });
+            }
+        });
     }
-);
+});
 </script>
 {% endblock %}
