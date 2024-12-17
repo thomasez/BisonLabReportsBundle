@@ -135,6 +135,8 @@ class ReportsController extends AbstractController
         $report_form_builder = $this->createFormBuilder()
             ->add('report', ChoiceType::class, array('choices' => $choices))
             ->add('filename', TextType::class, array('required' => false))
+            ->add('delimiter', ChoiceType::class,
+                array('label' => 'Field delimiter', 'choices' => array(';' => ';', ',' => ',', 'TAB' => 'TAB')))
             ->add('store_server', CheckboxType::class,
                 array('required' => false, 'label' => $this->translator->trans('Store the file on the server')));
             ;

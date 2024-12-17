@@ -8,3 +8,4 @@ bisonlab_reports:
     specify_filename: Filename (if you need it)
     store_server: Store the file on the server
     when_suitable: When suitable for the report type
+    delimiter: Field delimiter when choosing CSV file

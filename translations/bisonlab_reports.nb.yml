@@ -8,3 +8,4 @@ bisonlab_reports:
     specify_filename: Filnavn (hvis nødvendig)
     store_server: Lagre filen på serveren
     when_suitable: Der det passer
+    delimiter: Skilletegn ved valg av CSV-fil
