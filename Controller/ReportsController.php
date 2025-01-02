@@ -94,8 +94,7 @@ class ReportsController extends AbstractController
         }
 
         if (isset($config['store_server'])) {
-            $this->get('session')->getFlashBag()
-                ->add('info', "Report stored.");
+            $this->addFlash('info', "Report stored.");
             return $this->redirect($this->generateUrl('reports'));
         }
 
