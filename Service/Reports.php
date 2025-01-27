@@ -205,7 +205,7 @@ class Reports
         $delimiter = $config['delimiter'] ?? ",";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
-            $header = array_keys($report_result['data'][0]);
+            $header = array_keys($report_result['data'][0] ?? []);
         }
 
         fputcsv($output_file, $header, $delimiter);
@@ -328,7 +328,7 @@ class Reports
         $delimiter = $config['delimiter'] ?? ",";
 
         if (!isset($report_result['header']) || !$header = $report_result['header']) {
-            $header = array_keys($report_result['data'][0]);
+            $header = array_keys($report_result['data'][0] ?? []);
         }
 
         foreach ($report_result['data'] as $line) {
@@ -367,7 +367,7 @@ class Reports
          */
         if (!isset($report_result['header'])
                 || !$header = $report_result['header']) {
-            $header = array_keys($report_result['data'][0]);
+            $header = array_keys($report_result['data'][0] ?? []);
         }
         $title = $config['title'] ?? 'Report';
         $category = $config['category'] ?? 'Report';
