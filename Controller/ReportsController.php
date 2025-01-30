@@ -89,7 +89,7 @@ class ReportsController extends AbstractController
             $data = $report_result['data'];
             // We got da web.
             if (!isset($report_result['header']) || !$header = $report_result['header']) {
-                $header = array_keys($report_result['data'][0]);
+                $header = array_keys($report_result['data'][0] ?? []);
             }
         }
 
@@ -117,7 +117,7 @@ class ReportsController extends AbstractController
 
         $report_result = $this->reports->runCompiledReport($config);
         if (!isset($data['header']) || !$header = $data['header']) {
-            $header = array_keys($report_result['data'][0]);
+            $header = array_keys($report_result['data'][0] ?? []);
         }
         return $this->render('@BisonLabReports/Reports/run.html.twig',
             $report_result);
